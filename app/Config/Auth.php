@@ -157,7 +157,8 @@ class Auth extends ShieldAuth
      * --------------------------------------------------------------------
      * Determines whether users can register for the site.
      */
-    public bool $allowRegistration = true;
+    // erpKaan: residents join only via per-persona invitation; no open registration.
+    public bool $allowRegistration = false;
 
     /**
      * --------------------------------------------------------------------

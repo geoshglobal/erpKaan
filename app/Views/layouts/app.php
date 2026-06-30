@@ -66,6 +66,7 @@
                     ['label' => 'Condominios', 'url' => site_url('condominios'), 'active' => url_is('condominios*'),                    'show' => $u->can('condominios.manage')],
                     ['label' => 'Propiedades', 'url' => site_url('casas'),       'active' => url_is('casas*') || url_is('torres*') || url_is('cajones*'), 'show' => $u->can('propiedades.manage')],
                     ['label' => 'Personas',    'url' => site_url('personas'),    'active' => url_is('personas*'),                       'show' => $u->can('personas.manage')],
+                    ['label' => 'Mi portal',   'url' => site_url('portal'),      'active' => url_is('portal*'),                         'show' => $u->can('self.access') && ! $u->can('personas.manage')],
                 ];
                 ?>
                 <nav class="mainnav">

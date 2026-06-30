@@ -19,6 +19,7 @@
                 <th>Nombre</th>
                 <th>Contacto</th>
                 <th>RFC</th>
+                <th>Acceso app</th>
                 <th>Estado</th>
                 <th style="text-align:right;">Acciones</th>
             </tr>
@@ -43,8 +44,16 @@
                         <?= ! $p['email'] && ! $p['telefono'] ? '—' : '' ?>
                     </td>
                     <td class="muted"><?= esc($p['rfc'] ?: '—') ?></td>
+                    <td>
+                        <?php if (! empty($p['user_id'])): ?>
+                            <span class="pill on">Con cuenta</span>
+                        <?php else: ?>
+                            <span class="muted" style="font-size:.82rem;">Sin cuenta</span>
+                        <?php endif; ?>
+                    </td>
                     <td><span class="pill <?= $p['activo'] ? 'on' : 'off' ?>"><?= $p['activo'] ? 'Activo' : 'Inactivo' ?></span></td>
                     <td style="text-align:right; white-space:nowrap;">
+                        <a class="btn secondary small" href="<?= site_url('personas/' . $p['id'] . '/cuenta') ?>">Acceso</a>
                         <a class="btn secondary small" href="<?= site_url('personas/' . $p['id'] . '/editar') ?>">Editar</a>
                         <form method="post" action="<?= site_url('personas/' . $p['id'] . '/eliminar') ?>"
                               style="display:inline;" onsubmit="return confirm('¿Eliminar esta persona?');">

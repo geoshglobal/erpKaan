@@ -20,7 +20,7 @@ class Dashboard extends BaseController
             ['perm' => 'finanzas.manage',     'title' => 'Finanzas',       'desc' => 'Cuotas, multas y pagos',                     'url' => '#'],
             ['perm' => 'amenidades.manage',   'title' => 'Amenidades',     'desc' => 'Reserva de áreas comunes',                   'url' => '#'],
             ['perm' => 'comunicacion.manage', 'title' => 'Comunicación',   'desc' => 'Avisos y tickets',                           'url' => '#'],
-            ['perm' => 'self.access',         'title' => 'Mi portal',      'desc' => 'Mis casas, visitas y estados de cuenta',     'url' => '#'],
+            ['perm' => 'self.access',         'title' => 'Mi portal',      'desc' => 'Mis casas, visitas y estados de cuenta',     'url' => site_url('portal')],
         ];
 
         $allowed = array_values(array_filter(

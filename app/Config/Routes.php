@@ -8,9 +8,14 @@ $routes->get('/', 'Home::index');
 // Shield auth routes (login, register, logout, magic-link, etc.)
 service('auth')->routes($routes);
 
+// Public resident self-registration via per-persona invitation token.
+$routes->get('registro/(:segment)', 'Registro::show/$1');
+$routes->post('registro/(:segment)', 'Registro::register/$1');
+
 // Authenticated area
 $routes->group('', ['filter' => 'session'], static function (RouteCollection $routes): void {
     $routes->get('dashboard', 'Dashboard::index');
+    $routes->get('portal', 'Portal::index');
 
     // Switch active condominio (tenant context) — any logged-in user, validated by service.
     $routes->post('condominio/activo', 'Condominios::setActivo');
@@ -78,5 +83,10 @@ $routes->group('', ['filter' => 'session'], static function (RouteCollection $ro
         $routes->get('(:num)/editar', 'Personas::edit/$1');
         $routes->post('(:num)', 'Personas::update/$1');
         $routes->post('(:num)/eliminar', 'Personas::delete/$1');
+
+        // Resident login account / invitation for a persona.
+        $routes->get('(:num)/cuenta', 'Cuentas::index/$1');
+        $routes->post('(:num)/cuenta', 'Cuentas::store/$1');
+        $routes->post('(:num)/invitacion', 'Cuentas::invitar/$1');
     });
 });

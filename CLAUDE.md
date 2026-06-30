@@ -214,3 +214,13 @@ personas) → F2.1 accesos model + resident visit + QR → F2.2 caseta panel (sc
 check-in/out, status) → F2.3 paquetería + delivery → F2.4 notifications (in-app→email→push)
 → F2.5 guest temporary access (ties to F5). Push/HTTPS note: camera + Web Push need a secure
 context (localhost OK; prod needs HTTPS).
+
+- **F2.0 resident accounts done:** Shield open registration disabled
+  (`Auth::$allowRegistration=false`) — invite-only. `ResidentAccount` library creates a
+  Shield user (email login), activates, adds the role group (dueno/inquilino/huesped) and
+  links `personas.user_id`. Managed from a persona (`Personas list → Acceso`): `Cuentas`
+  controller (admin creates account directly OR generates a per-persona invitation, 14-day
+  token in `invitaciones`). Public token-gated self-register: `Registro` controller +
+  `registro/(:segment)` routes → auto-login → `/portal`. `Portal` controller = resident
+  landing (owned casas + current ocupaciones). "Mi portal" in nav for residents. Verified
+  end-to-end (admin-create, invite+self-register, resident login, permission isolation).

@@ -50,6 +50,23 @@ class OcupanteModel extends Model
         return $this->where('ocupacion_id', $ocupacionId)->countAllResults();
     }
 
+    /**
+     * Casas a persona currently occupies (vigente occupancies), with identifier and role.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function casasForPersona(int $personaId): array
+    {
+        return $this->select('casas.id AS casa_id, casas.identificador, ocupantes.rol, ocupaciones.tipo_uso')
+            ->join('ocupaciones', 'ocupaciones.id = ocupantes.ocupacion_id')
+            ->join('casas', 'casas.id = ocupaciones.casa_id')
+            ->where('ocupantes.persona_id', $personaId)
+            ->where('ocupaciones.vigente', 1)
+            ->where('ocupaciones.deleted_at', null)
+            ->orderBy('casas.identificador', 'ASC')
+            ->findAll();
+    }
+
     /** Clear the principal role (set to secundario) for all ocupantes of an ocupacion. */
     public function clearPrincipal(int $ocupacionId): void
     {
