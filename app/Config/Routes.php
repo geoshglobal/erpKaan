@@ -19,6 +19,7 @@ $routes->get('pase/(:segment)', 'Pase::show/$1');
 $routes->group('', ['filter' => 'session'], static function (RouteCollection $routes): void {
     $routes->get('dashboard', 'Dashboard::index');
     $routes->get('portal', 'Portal::index');
+    $routes->get('notificaciones', 'Notificaciones::index');
     $routes->get('portal/perfil', 'Portal::perfil');
     $routes->post('portal/perfil', 'Portal::updatePerfil');
     // Resident visits (tipo=visita) + QR pass.
@@ -45,6 +46,7 @@ $routes->group('', ['filter' => 'session'], static function (RouteCollection $ro
     // Caseta operations: scan + register entry/exit.
     $routes->group('caseta', ['filter' => 'permission:caseta.operate'], static function (RouteCollection $routes): void {
         $routes->get('escaner', 'Caseta::escaner');
+        $routes->get('accesos/(:num)/checkin', 'Caseta::checkinForm/$1');
         $routes->post('accesos/(:num)/checkin', 'Caseta::checkin/$1');
         $routes->post('accesos/(:num)/checkout', 'Caseta::checkout/$1');
     });

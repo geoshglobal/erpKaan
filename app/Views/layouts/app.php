@@ -16,9 +16,20 @@
         header.topbar nav.mainnav a { color:#cbd5e1; text-decoration:none; font-size:.9rem; padding:.4rem .7rem; border-radius:8px; line-height:1; }
         header.topbar nav.mainnav a:hover { color:#fff; background:#1e293b; }
         header.topbar nav.mainnav a.active { color:#fff; background:#0d9488; font-weight:600; }
-        header.topbar .user { display:flex; align-items:center; gap:.75rem; font-size:.9rem; }
+        header.topbar .user { display:flex; align-items:center; gap:.9rem; font-size:.9rem; }
         header.topbar .user a { color:#cbd5e1; text-decoration:none; }
         header.topbar .user a:hover { color:#fff; }
+        .bell { position:relative; display:inline-flex; align-items:center; color:#cbd5e1; }
+        .bell:hover { color:#fff; }
+        .bell .badge { position:absolute; top:-7px; right:-9px; background:#ef4444; color:#fff; border-radius:999px; font-size:.62rem; font-weight:700; padding:.05rem .3rem; }
+        .user-menu { position:relative; }
+        .user-menu summary { list-style:none; cursor:pointer; color:#cbd5e1; display:inline-flex; align-items:center; gap:.3rem; }
+        .user-menu summary::-webkit-details-marker { display:none; }
+        .user-menu summary:hover { color:#fff; }
+        .user-menu[open] summary { color:#fff; }
+        .user-menu .menu { position:absolute; right:0; top:150%; background:#fff; color:#0f172a; border:1px solid var(--line); border-radius:8px; min-width:170px; box-shadow:0 8px 24px rgba(0,0,0,.14); z-index:30; overflow:hidden; }
+        .user-menu .menu a { display:block; padding:.6rem .9rem; color:#0f172a; font-size:.88rem; }
+        .user-menu .menu a:hover { background:#f1f5f9; color:#0f172a; }
         main { max-width: 1040px; margin: 1.5rem auto; padding: 0 1.25rem; }
         .alert { padding:.75rem 1rem; border-radius:8px; margin-bottom:1rem; font-size:.9rem; }
         .alert.error { background:#fee2e2; color:#991b1b; }
@@ -99,8 +110,19 @@
                         </select>
                     </form>
                 <?php endif; ?>
-                <span><?= esc(auth()->user()->email ?? auth()->user()->username) ?></span>
-                <a href="<?= site_url('logout') ?>">Cerrar sesión</a>
+                <?php $unread = (new \App\Models\NotificacionModel())->unreadCount((int) auth()->id()); ?>
+                <a href="<?= site_url('notificaciones') ?>" class="bell" title="Notificaciones">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                    <?php if ($unread > 0): ?>
+                        <span class="badge"><?= $unread > 9 ? '9+' : $unread ?></span>
+                    <?php endif; ?>
+                </a>
+                <details class="user-menu">
+                    <summary><?= esc(auth()->user()->email ?? auth()->user()->username) ?> <span style="font-size:.7rem;">▾</span></summary>
+                    <div class="menu">
+                        <a href="<?= site_url('logout') ?>">Cerrar sesión</a>
+                    </div>
+                </details>
             </div>
         <?php endif; ?>
     </header>

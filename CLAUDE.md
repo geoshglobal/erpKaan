@@ -234,8 +234,17 @@ notifications = **in-app → email → push** · visits = **immediate AND schedu
   open redirect). Check-in/out buttons appear on the public pass when a caseta operator is
   logged in (`Pase` passes `canOperate`) and on the accesos detail; `partials/caseta_actions`
   renders the right button per estado. Verified: check-in/out, timeline, anon sees no
-  controls, non-caseta blocked. **F2 core = F2.0–F2.2 done.** Remaining: F2.3 paquetería/
-  delivery, F2.4 notifications, F2.5 guest access.
+  controls, non-caseta blocked.
+- **F2.4 in-app notifications + enriched check-in done:** `notificaciones` table +
+  `NotificacionModel` + `Notify::acceso()` (notifies the visit's solicitante). Topbar flat
+  bell (SVG) with unread badge → `/notificaciones` (viewing marks all read). Check-in is now
+  a FORM (`Caseta::checkinForm` GET → `checkin` POST) capturing pax_ingresaron (JS alert +
+  call/WhatsApp buttons to the resident when it exceeds the registered count),
+  ingreso_vehiculo + folio_corbatin + placas, and an ID photo (uploads/accesos) or a "sin ID"
+  flag + reason. `Phone` library builds wa.me/tel links defaulting to +52. Check-in fires
+  "Tu visita llegó", check-out "Tu visita salió". Topbar: user email is a `<details>`
+  dropdown containing Cerrar sesión. Email/push channels still pending. **F2 core = F2.0–F2.2
+  + F2.4 done.** Remaining: F2.3 paquetería/delivery, F2.4 email/push, F2.5 guest access.
 
 **Sub-steps:** F2.0 resident accounts (prereq — residents need Shield logins linked to
 personas) → F2.1 accesos model + resident visit + QR → F2.2 caseta panel (scan/validate,

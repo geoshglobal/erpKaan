@@ -4,3 +4,6 @@
 !personas/
 personas/*
 !personas/.gitkeep
+!accesos/
+accesos/*
+!accesos/.gitkeep

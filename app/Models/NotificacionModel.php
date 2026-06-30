@@ -1,0 +1,40 @@
+<?php
+
+namespace App\Models;
+
+use CodeIgniter\Model;
+
+class NotificacionModel extends Model
+{
+    protected $table         = 'notificaciones';
+    protected $primaryKey    = 'id';
+    protected $returnType    = 'array';
+    protected $useTimestamps = true;
+    protected $dateFormat    = 'datetime';
+    protected $updatedField  = '';
+
+    protected $allowedFields = [
+        'condominio_id', 'persona_id', 'user_id', 'acceso_id',
+        'tipo', 'titulo', 'mensaje', 'canal', 'leido_at',
+    ];
+
+    /** Unread in-app notifications count for a user. */
+    public function unreadCount(int $userId): int
+    {
+        return $this->where('user_id', $userId)->where('leido_at', null)->countAllResults();
+    }
+
+    /** Latest notifications for a user. @return list<array<string,mixed>> */
+    public function forUser(int $userId, int $limit = 50): array
+    {
+        return $this->where('user_id', $userId)->orderBy('id', 'DESC')->findAll($limit);
+    }
+
+    public function markAllRead(int $userId): void
+    {
+        $this->builder()
+            ->where('user_id', $userId)
+            ->where('leido_at', null)
+            ->update(['leido_at' => date('Y-m-d H:i:s')]);
+    }
+}

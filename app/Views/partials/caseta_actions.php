@@ -8,10 +8,7 @@ $estado = AccesoModel::estadoEfectivo($acceso);
         <?php if ($estado === 'vencido'): ?>
             <p class="muted" style="font-size:.82rem; margin:.25rem 0;">⚠️ Pase fuera de su ventana de vigencia.</p>
         <?php endif; ?>
-        <form method="post" action="<?= site_url('caseta/accesos/' . $acceso['id'] . '/checkin') ?>" style="display:inline;">
-            <?= csrf_field() ?>
-            <button class="btn">Registrar entrada</button>
-        </form>
+        <a class="btn" href="<?= site_url('caseta/accesos/' . $acceso['id'] . '/checkin') ?>">Registrar entrada</a>
     <?php elseif ($estado === 'ingresado'): ?>
         <form method="post" action="<?= site_url('caseta/accesos/' . $acceso['id'] . '/checkout') ?>" style="display:inline;">
             <?= csrf_field() ?>
