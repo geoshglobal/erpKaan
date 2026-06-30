@@ -259,6 +259,11 @@ Requested 2026-06-30; to build later:
    currently-inside vehicle access). If none free → fall back to a **resident's spot**, which
    **the resident must authorize** (notification + approve/deny flow before/at entry). Needs:
    occupancy tracking of visitor spots, and an authorization request to the resident.
+3. **Caseta "take photo" button for the ID.** The check-in `id_foto` input uses `capture`
+   (opens the camera on mobile only). Add an explicit "Tomar foto" button that opens the live
+   camera via `getUserMedia`, captures a frame to a canvas, and submits it as the ID photo —
+   so the operator captures directly on desktop/tablet without browsing for a file (falls back
+   to the file picker where the camera isn't available; needs localhost/HTTPS).
 
 **Sub-steps:** F2.0 resident accounts (prereq — residents need Shield logins linked to
 personas) → F2.1 accesos model + resident visit + QR → F2.2 caseta panel (scan/validate,
