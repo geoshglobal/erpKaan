@@ -104,6 +104,7 @@ class Condominios extends BaseController
             'cp'             => $this->request->getPost('cp'),
             'pais'           => $this->request->getPost('pais') ?: 'MX',
             'moneda'         => $this->request->getPost('moneda') ?: 'MXN',
+            'max_ocupantes'  => ($mo = $this->request->getPost('max_ocupantes')) !== null && $mo !== '' ? (int) $mo : null,
             'telefono'       => $this->request->getPost('telefono'),
             'email'          => $this->request->getPost('email'),
             'razon_social'   => $this->request->getPost('razon_social'),

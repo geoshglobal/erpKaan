@@ -16,7 +16,7 @@ class CasaModel extends Model
 
     protected $allowedFields = [
         'condominio_id', 'torre_id', 'identificador', 'tipo_ocupacion_actual',
-        'num_cajones', 'm2', 'notas', 'activo',
+        'num_cajones', 'max_ocupantes', 'm2', 'notas', 'activo',
     ];
 
     protected $validationRules = [

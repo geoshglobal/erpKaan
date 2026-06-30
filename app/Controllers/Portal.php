@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Libraries\OccupancyRules;
 use App\Libraries\OccupantInvite;
 use App\Models\CasaPropietarioModel;
 use App\Models\InvitacionModel;
@@ -111,6 +112,9 @@ class Portal extends BaseController
         $nombre = trim((string) $this->request->getPost('nombre'));
         if ($nombre === '') {
             return redirect()->to($back)->with('error', 'El nombre es obligatorio.');
+        }
+        if ((new OccupancyRules())->wouldExceed($ocupId)) {
+            return redirect()->to($back)->with('error', 'Se alcanzó el máximo de ocupantes permitido para tu casa.');
         }
 
         $personaId = (int) $this->personas->insert([

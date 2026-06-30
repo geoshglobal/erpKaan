@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Libraries\OccupancyRules;
 use App\Models\CasaModel;
 use App\Models\InvitacionModel;
 use App\Models\OcupacionModel;
@@ -164,6 +165,9 @@ class Ocupaciones extends BaseController
         if ($this->ocupantes->isOcupante($ocupId, $personaId)) {
             return redirect()->to($back)->with('error', 'Esa persona ya es ocupante.');
         }
+        if ((new OccupancyRules())->wouldExceed($ocupId)) {
+            return redirect()->to($back)->with('error', 'Se alcanzó el máximo de ocupantes permitido para esta casa.');
+        }
 
         $rol = $this->request->getPost('rol') === 'principal' ? 'principal' : 'secundario';
         if ($rol === 'principal') {
@@ -218,6 +222,12 @@ class Ocupaciones extends BaseController
             }
             $nombre ??= PersonaModel::fullName($p);
             $email  ??= $p['email'];
+        }
+
+        // A new body (not an existing occupant getting an account) counts toward the limit.
+        $alreadyOccupant = $personaId !== null && $this->ocupantes->isOcupante($ocupId, $personaId);
+        if (! $alreadyOccupant && (new OccupancyRules())->wouldExceed($ocupId)) {
+            return redirect()->to($back)->with('error', 'Se alcanzó el máximo de ocupantes permitido para esta casa.');
         }
 
         $this->invitaciones->insert([

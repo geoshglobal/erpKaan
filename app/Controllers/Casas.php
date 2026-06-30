@@ -113,6 +113,7 @@ class Casas extends BaseController
             'identificador'         => $this->request->getPost('identificador'),
             'tipo_ocupacion_actual' => $this->request->getPost('tipo_ocupacion_actual') ?: 'propio',
             'num_cajones'           => (int) ($this->request->getPost('num_cajones') ?? 0),
+            'max_ocupantes'         => ($mo = $this->request->getPost('max_ocupantes')) !== null && $mo !== '' ? (int) $mo : null,
             'm2'                    => $this->request->getPost('m2') ?: null,
             'notas'                 => $this->request->getPost('notas'),
             'activo'                => (int) ($this->request->getPost('activo') ?? 1),

@@ -71,6 +71,10 @@ $selectedUso   = (string) $val('tipo_ocupacion_actual', 'propio');
             <input type="text" name="m2" value="<?= esc($val('m2')) ?>">
         </div>
     </div>
+    <div class="field" style="max-width:50%;">
+        <label>Máx. ocupantes (override del condominio)</label>
+        <input type="text" name="max_ocupantes" value="<?= esc($val('max_ocupantes')) ?>" placeholder="Vacío = usa el default del condominio">
+    </div>
     <div class="field">
         <label>Notas</label>
         <input type="text" name="notas" value="<?= esc($val('notas')) ?>">

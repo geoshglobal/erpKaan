@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\CasaPropietarioModel;
+use App\Models\OcupanteModel;
 use App\Models\PersonaModel;
 use CodeIgniter\HTTP\RedirectResponse;
 
@@ -65,6 +66,7 @@ class Personas extends BaseController
             'persona'     => $persona,
             'action'      => site_url('personas/' . $id),
             'propiedades' => (new CasaPropietarioModel())->casasOfPersona($id),
+            'ocupaciones' => (new OcupanteModel())->casasForPersona($id),
         ]);
     }
 

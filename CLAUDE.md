@@ -215,6 +215,18 @@ check-in/out, status) → F2.3 paquetería + delivery → F2.4 notifications (in
 → F2.5 guest temporary access (ties to F5). Push/HTTPS note: camera + Web Push need a secure
 context (localhost OK; prod needs HTTPS).
 
+- **Occupant invitations + portal self-service (F2.0b) done:** `invitaciones` extended
+  (tipo cuenta|ocupante, ocupacion_id, rol_ocupante, nullable persona_id). `OccupantInvite`
+  service handles new-user vs existing-user (password-verified) linking + add/move choice
+  (cross-condominio: one login → many personas). Admin invites occupants from an ocupación;
+  residents (principal) manage their own casa's occupants (name-only add = persona without
+  login; invite-for-account forced to inquilino role). Portal self-edit of own persona
+  (generales + fiscales). Occupant limits: `condominios.max_ocupantes` default +
+  `casas.max_ocupantes` override (NULL=unlimited), enforced via `OccupancyRules` at all add
+  points (counts occupants + pending invites). `OcupanteModel::ofOcupacion` returns
+  `user_id` so account status renders correctly. Persona edit shows "Casas que ocupa".
+  Security: tokens single-use/14-day; identity-claim requires the account password;
+  resident-issued invites can't escalate role; all actions tenant/owner-scoped.
 - **F2.0 resident accounts done:** Shield open registration disabled
   (`Auth::$allowRegistration=false`) — invite-only. `ResidentAccount` library creates a
   Shield user (email login), activates, adds the role group (dueno/inquilino/huesped) and

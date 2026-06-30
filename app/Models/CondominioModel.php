@@ -18,7 +18,7 @@ class CondominioModel extends Model
 
     protected $allowedFields = [
         'nombre', 'slug', 'direccion', 'colonia', 'municipio', 'estado', 'cp',
-        'pais', 'moneda', 'telefono', 'email',
+        'pais', 'moneda', 'max_ocupantes', 'telefono', 'email',
         'razon_social', 'rfc', 'regimen_fiscal', 'cp_fiscal',
         'latitud', 'longitud',
         'logo_path', 'settings', 'activo',

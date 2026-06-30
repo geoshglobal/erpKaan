@@ -150,4 +150,31 @@
     </div>
 <?php endif; ?>
 
+<?php if (isset($ocupaciones)): ?>
+    <?php $usos = ['propio' => 'Uso propio', 'renta_lineal' => 'Renta lineal', 'renta_vacacional' => 'Renta vacacional']; ?>
+    <div class="card" style="margin-top:1.25rem;">
+        <h2 style="margin:0 0 .75rem; font-size:1.05rem;">Casas que ocupa</h2>
+        <?php if ($ocupaciones === []): ?>
+            <p class="muted" style="margin:0;">No ocupa ninguna casa actualmente. Se gestiona desde
+                <a href="<?= site_url('casas') ?>">Casas → Ocupación</a>.</p>
+        <?php else: ?>
+            <table class="grid">
+                <thead><tr><th>Casa</th><th>Uso</th><th>Rol</th><th style="text-align:right;"></th></tr></thead>
+                <tbody>
+                    <?php foreach ($ocupaciones as $o): ?>
+                        <tr>
+                            <td><strong><?= esc($o['identificador']) ?></strong></td>
+                            <td><?= esc($usos[$o['tipo_uso']] ?? $o['tipo_uso']) ?></td>
+                            <td><?= $o['rol'] === 'principal' ? '<span class="pill on">Principal</span>' : '<span class="muted">Secundario</span>' ?></td>
+                            <td style="text-align:right;">
+                                <a class="btn secondary small" href="<?= site_url('casas/' . $o['casa_id'] . '/ocupaciones/' . $o['ocupacion_id'] . '/editar') ?>">Ver ocupación</a>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        <?php endif; ?>
+    </div>
+<?php endif; ?>
+
 <?= $this->endSection() ?>

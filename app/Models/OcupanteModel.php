@@ -32,7 +32,7 @@ class OcupanteModel extends Model
      */
     public function ofOcupacion(int $ocupacionId): array
     {
-        return $this->select('ocupantes.*, personas.nombre, personas.apellido_paterno, personas.apellido_materno, personas.foto_path')
+        return $this->select('ocupantes.*, personas.nombre, personas.apellido_paterno, personas.apellido_materno, personas.foto_path, personas.user_id')
             ->join('personas', 'personas.id = ocupantes.persona_id')
             ->where('ocupantes.ocupacion_id', $ocupacionId)
             ->orderBy("FIELD(ocupantes.rol, 'principal', 'secundario')", '', false)

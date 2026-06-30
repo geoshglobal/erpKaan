@@ -89,6 +89,10 @@ $activo = (int) $val('activo', 1);
                 <input type="text" name="moneda" maxlength="3" value="<?= esc($val('moneda', 'MXN')) ?>">
             </div>
         </div>
+        <div class="field" style="max-width:50%;">
+            <label>Máx. ocupantes por casa (default)</label>
+            <input type="text" name="max_ocupantes" value="<?= esc($val('max_ocupantes')) ?>" placeholder="Vacío = sin límite">
+        </div>
     </fieldset>
 
     <fieldset>
