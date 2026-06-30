@@ -184,5 +184,33 @@ Production has **no `DELETE` and no DDL** (`CREATE`/`ALTER`/`DROP`). Implication
   `casas.tipo_ocupacion_actual`**. Ocupantes: one principal + N secundarios (single-principal
   invariant), parentesco, duplicate guard. Verified incl. vigente sync + isolation.
 - **Personas roadmap:** step 1 base ✅ · step 2 owners↔casas ✅ · step 3 occupancy ✅.
-  **F1 (Auth + Propiedades + Personas) complete.** Next: F2 (access control — visit QR,
-  parcels, caseta panel, notifications).
+  **F1 (Auth + Propiedades + Personas) complete.**
+
+## F2 — Access control (planned)
+
+Residents create access requests (visita w/ QR, paquetería, delivery); caseta validates
+and updates status; system notifies residents on each change.
+
+**Decisions:** resident accounts = **both** (admin creates/invites + self-register code) ·
+QR validation = **camera scan + manual search** (camera OK on localhost secure context) ·
+notifications = **in-app → email → push** · visits = **immediate AND scheduled window**.
+
+**Data model:**
+- `accesos` — condominio_id, casa_id, tipo(visita/paqueteria/delivery/proveedor),
+  solicitante_persona_id, creado_por_user_id, nombre_visitante, empresa, telefono,
+  num_personas, placas, foto_path, qr_token(unique), valido_desde, valido_hasta, estado,
+  check_in_at, check_out_at, caseta_user_id, notas (+ soft deletes)
+- `acceso_eventos` — acceso_id, estado_anterior, estado_nuevo, user_id, nota, created_at (audit/timeline)
+- `notificaciones` — condominio_id, persona_id/user_id, acceso_id, titulo, mensaje,
+  canal(in_app/email/push), leido_at, enviado_at, created_at
+- `push_subscriptions` — Web Push subs (only when PWA push is built)
+
+**Status flow:** visita/delivery/proveedor `programado → ingresado (check-in, notify "llegó")
+→ finalizado (check-out, notify "salió")` + `cancelado/vencido`; paquetería
+`en_caseta (notify) → entregado` + `cancelado`.
+
+**Sub-steps:** F2.0 resident accounts (prereq — residents need Shield logins linked to
+personas) → F2.1 accesos model + resident visit + QR → F2.2 caseta panel (scan/validate,
+check-in/out, status) → F2.3 paquetería + delivery → F2.4 notifications (in-app→email→push)
+→ F2.5 guest temporary access (ties to F5). Push/HTTPS note: camera + Web Push need a secure
+context (localhost OK; prod needs HTTPS).
