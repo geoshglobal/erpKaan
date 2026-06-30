@@ -246,6 +246,20 @@ notifications = **in-app → email → push** · visits = **immediate AND schedu
   dropdown containing Cerrar sesión. Email/push channels still pending. **F2 core = F2.0–F2.2
   + F2.4 done.** Remaining: F2.3 paquetería/delivery, F2.4 email/push, F2.5 guest access.
 
+### F2 backlog — visitor vehicle access + parking (PLANNED, not built)
+
+Requested 2026-06-30; to build later:
+1. **Resident authorizes vehicle on the visit.** The "Nueva visita" form (resident) should
+   include "¿se permite acceso en vehículo?" — add `accesos.permite_vehiculo` (bool). This
+   is the resident's authorization at creation, distinct from caseta's `ingreso_vehiculo`
+   (what actually happened at the gate).
+2. **Visitor parking (cajones de visita).** Condo config has 0+ visitor spots (model via
+   existing `cajones` with `tipo='visita'`, or a count on the condominio). At check-in with a
+   vehicle, caseta must check if a visitor spot is **available** (not occupied by another
+   currently-inside vehicle access). If none free → fall back to a **resident's spot**, which
+   **the resident must authorize** (notification + approve/deny flow before/at entry). Needs:
+   occupancy tracking of visitor spots, and an authorization request to the resident.
+
 **Sub-steps:** F2.0 resident accounts (prereq — residents need Shield logins linked to
 personas) → F2.1 accesos model + resident visit + QR → F2.2 caseta panel (scan/validate,
 check-in/out, status) → F2.3 paquetería + delivery → F2.4 notifications (in-app→email→push)
