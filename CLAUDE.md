@@ -132,3 +132,7 @@ Production has **no `DELETE` and no DDL** (`CREATE`/`ALTER`/`DROP`). Implication
   (condominios → torres → casas → cajones → personas → casa_propietarios → ocupaciones →
   ocupantes → vehiculos, + condominio_usuarios), migrated against the live DB (19 tables),
   seeded superadmin + demo condominio.
+- **Auth flow live:** `Home` redirects to `/dashboard` or `/login`; `/dashboard` (filter
+  `session`) shows a role-aware module grid (cards gated by `user->can(permission)`).
+  Login redirect → `/dashboard`. Set `App::$indexPage=''` for clean URLs. Verified
+  end-to-end with the superadmin (login 303 → dashboard, all 10 modules visible).
