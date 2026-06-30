@@ -19,7 +19,7 @@ $ok = in_array($estado, ['programado', 'ingresado'], true);
         <span class="pill <?= $ok ? 'on' : 'off' ?>" style="font-size:.85rem;"><?= esc($estadoLabel) ?></span>
     </div>
 
-    <div class="muted" style="font-size:.85rem; margin-top:1rem; text-align:left;">
+    <div class="muted" style="font-size:.85rem; margin-top:1rem; text-align:center;">
         <?php if ($acceso['empresa']): ?><div>Motivo: <?= esc($acceso['empresa']) ?></div><?php endif; ?>
         <?php if ($acceso['placas']): ?><div>Placas: <?= esc($acceso['placas']) ?></div><?php endif; ?>
         <div>Vigencia:

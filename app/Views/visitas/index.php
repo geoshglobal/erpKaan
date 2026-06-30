@@ -9,8 +9,6 @@
     <a class="btn" href="<?= site_url('portal/visitas/nueva') ?>">+ Nueva visita</a>
 </div>
 
-<?php if (session('success')): ?><div class="alert success"><?= esc(session('success')) ?></div><?php endif; ?>
-<?php if (session('error')): ?><div class="alert error"><?= esc(session('error')) ?></div><?php endif; ?>
 
 <?php
 $pillClass = ['programado' => 'on', 'ingresado' => 'on', 'finalizado' => 'off', 'cancelado' => 'off', 'vencido' => 'off'];

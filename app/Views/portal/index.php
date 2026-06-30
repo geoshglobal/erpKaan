@@ -15,7 +15,6 @@ $usos = ['propio' => 'Uso propio', 'renta_lineal' => 'Renta lineal', 'renta_vaca
     <?php endif; ?>
 </div>
 
-<?php if (session('success')): ?><div class="alert success"><?= esc(session('success')) ?></div><?php endif; ?>
 
 <?php if ($persona === null): ?>
     <div class="alert error">Tu usuario no está vinculado a una persona del condominio. Contacta a la administración.</div>

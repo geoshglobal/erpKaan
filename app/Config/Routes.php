@@ -36,6 +36,12 @@ $routes->group('', ['filter' => 'session'], static function (RouteCollection $ro
     // Switch active condominio (tenant context) — any logged-in user, validated by service.
     $routes->post('condominio/activo', 'Condominios::setActivo');
 
+    // Access supervision panel (condominio-wide, not persona-scoped).
+    $routes->group('accesos', ['filter' => 'permission:accesos.supervisar'], static function (RouteCollection $routes): void {
+        $routes->get('/', 'Accesos::index');
+        $routes->get('(:num)', 'Accesos::detail/$1');
+    });
+
     // Condominios management — platform level (superadmin via permission).
     $routes->group('condominios', ['filter' => 'permission:condominios.manage'], static function (RouteCollection $routes): void {
         $routes->get('/', 'Condominios::index');

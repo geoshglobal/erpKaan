@@ -12,8 +12,6 @@
     <a class="btn secondary" href="<?= site_url('portal') ?>">← Mi portal</a>
 </div>
 
-<?php if (session('error')): ?><div class="alert error"><?= esc(session('error')) ?></div><?php endif; ?>
-<?php if (session('success')): ?><div class="alert success"><?= esc(session('success')) ?></div><?php endif; ?>
 
 <?php
 $invByPersona = [];

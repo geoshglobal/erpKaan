@@ -86,6 +86,7 @@ class AuthGroups extends ShieldAuthGroups
         'personas.manage'     => 'Administrar dueños e inquilinos',
         'ocupaciones.manage'  => 'Administrar ocupaciones y rentas',
         'accesos.manage'      => 'Crear/gestionar solicitudes de acceso y QR',
+        'accesos.supervisar'  => 'Ver y supervisar todos los accesos del condominio',
         'caseta.operate'      => 'Operar caseta: cambiar status, registrar entradas/salidas',
         'finanzas.manage'     => 'Administrar cuotas, multas y pagos',
         'amenidades.manage'   => 'Configurar y reservar áreas comunes',
@@ -109,6 +110,7 @@ class AuthGroups extends ShieldAuthGroups
             'personas.manage',
             'ocupaciones.manage',
             'accesos.manage',
+            'accesos.supervisar',
             'caseta.operate',
             'finanzas.manage',
             'amenidades.manage',
@@ -121,6 +123,7 @@ class AuthGroups extends ShieldAuthGroups
             'personas.manage',
             'ocupaciones.manage',
             'accesos.manage',
+            'accesos.supervisar',
             'caseta.operate',
             'finanzas.manage',
             'amenidades.manage',
@@ -129,6 +132,7 @@ class AuthGroups extends ShieldAuthGroups
         ],
         'comite' => [
             'admin.access',
+            'accesos.supervisar',
             'finanzas.manage',
             'amenidades.manage',
             'comunicacion.manage',
@@ -136,6 +140,7 @@ class AuthGroups extends ShieldAuthGroups
         ],
         'caseta' => [
             'accesos.manage',
+            'accesos.supervisar',
             'caseta.operate',
         ],
         'dueno' => [

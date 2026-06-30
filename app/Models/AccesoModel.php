@@ -44,6 +44,18 @@ class AccesoModel extends Model
         return $this->where('qr_token', $token)->first();
     }
 
+    /** All accesos of a condominio with casa + requester name (supervision). @return list<array<string,mixed>> */
+    public function forCondominio(int $condominioId): array
+    {
+        return $this->select('accesos.*, casas.identificador AS casa_ident,
+                TRIM(CONCAT(personas.nombre, " ", COALESCE(personas.apellido_paterno, ""))) AS solicitante')
+            ->join('casas', 'casas.id = accesos.casa_id', 'left')
+            ->join('personas', 'personas.id = accesos.solicitante_persona_id', 'left')
+            ->where('accesos.condominio_id', $condominioId)
+            ->orderBy('accesos.id', 'DESC')
+            ->findAll();
+    }
+
     /** Visits requested by a persona (most recent first). @return list<array<string,mixed>> */
     public function forSolicitante(int $personaId): array
     {

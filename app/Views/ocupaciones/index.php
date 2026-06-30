@@ -17,8 +17,6 @@
     </div>
 </div>
 
-<?php if (session('error')): ?><div class="alert error"><?= esc(session('error')) ?></div><?php endif; ?>
-<?php if (session('success')): ?><div class="alert success"><?= esc(session('success')) ?></div><?php endif; ?>
 
 <?php if ($ocupaciones === []): ?>
     <p class="muted">Esta casa no tiene ocupaciones registradas.</p>

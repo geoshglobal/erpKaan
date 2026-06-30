@@ -7,7 +7,6 @@
     <a class="btn secondary" href="<?= site_url('portal/visitas') ?>">← Mis visitas</a>
 </div>
 
-<?php if (session('success')): ?><div class="alert success"><?= esc(session('success')) ?></div><?php endif; ?>
 
 <?= $this->include('partials/pase_card', ['acceso' => $acceso, 'casaIdent' => $casaIdent, 'passUrl' => $passUrl]) ?>
 

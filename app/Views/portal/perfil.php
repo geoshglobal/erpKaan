@@ -9,7 +9,6 @@
     <a class="btn secondary" href="<?= site_url('portal') ?>">← Mi portal</a>
 </div>
 
-<?php if (session('success')): ?><div class="alert success"><?= esc(session('success')) ?></div><?php endif; ?>
 <?php if (session('errors')): ?>
     <div class="alert error"><ul style="margin:0; padding-left:1.1rem;">
         <?php foreach ((array) session('errors') as $e): ?><li><?= esc($e) ?></li><?php endforeach; ?>

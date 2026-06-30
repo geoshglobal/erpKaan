@@ -218,6 +218,14 @@ notifications = **in-app → email → push** · visits = **immediate AND schedu
   dependency) encoding the public `pase/{token}` URL. Public `Pase` controller shows a
   read-only pass (what the QR opens; caseta check-in lands here in F2.2). Verified: create,
   QR, public pass, cancel, cross-resident isolation.
+- **Accesos supervision panel:** new permission `accesos.supervisar` (superadmin, admin,
+  comité, caseta — NOT residents). `Accesos` controller lists/details all accesos of the
+  active condominio (condominio-wide, NOT persona-scoped) so supervisors oversee without
+  owning a property. Detail shows the `acceso_eventos` timeline. Dashboard "Accesos" card +
+  nav gated by `accesos.supervisar`; residents reach their own visits via the portal.
+- **Flash messages:** rendered ONCE by the layout (`layouts/app.php`) — views must NOT
+  re-render `session('success')`/`session('error')` (only `session('errors')`, the
+  validation array, which the layout doesn't show).
 
 **Sub-steps:** F2.0 resident accounts (prereq — residents need Shield logins linked to
 personas) → F2.1 accesos model + resident visit + QR → F2.2 caseta panel (scan/validate,
