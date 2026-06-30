@@ -1,0 +1,6 @@
+# Ignore uploaded files, keep the directory tree
+*
+!.gitignore
+!personas/
+personas/*
+!personas/.gitkeep

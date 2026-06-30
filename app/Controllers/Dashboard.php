@@ -13,7 +13,7 @@ class Dashboard extends BaseController
         $modules = [
             ['perm' => 'condominios.manage',  'title' => 'Condominios',   'desc' => 'Alta y configuración de condominios',        'url' => site_url('condominios')],
             ['perm' => 'propiedades.manage',  'title' => 'Propiedades',    'desc' => 'Torres, casas y cajones',                    'url' => site_url('casas')],
-            ['perm' => 'personas.manage',     'title' => 'Personas',       'desc' => 'Dueños e inquilinos',                        'url' => '#'],
+            ['perm' => 'personas.manage',     'title' => 'Personas',       'desc' => 'Dueños e inquilinos',                        'url' => site_url('personas')],
             ['perm' => 'ocupaciones.manage',  'title' => 'Ocupaciones',    'desc' => 'Uso propio / renta lineal / vacacional',     'url' => '#'],
             ['perm' => 'accesos.manage',      'title' => 'Accesos',        'desc' => 'Visitas, QR, paquetería y delivery',         'url' => '#'],
             ['perm' => 'caseta.operate',      'title' => 'Caseta',         'desc' => 'Operación de control de acceso',             'url' => '#'],

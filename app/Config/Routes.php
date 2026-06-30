@@ -52,4 +52,14 @@ $routes->group('', ['filter' => 'session'], static function (RouteCollection $ro
         $routes->post('(:num)', 'Cajones::update/$1');
         $routes->post('(:num)/eliminar', 'Cajones::delete/$1');
     });
+
+    // Personas — scoped to the active condominio.
+    $routes->group('personas', ['filter' => 'permission:personas.manage'], static function (RouteCollection $routes): void {
+        $routes->get('/', 'Personas::index');
+        $routes->get('nueva', 'Personas::new');
+        $routes->post('/', 'Personas::create');
+        $routes->get('(:num)/editar', 'Personas::edit/$1');
+        $routes->post('(:num)', 'Personas::update/$1');
+        $routes->post('(:num)/eliminar', 'Personas::delete/$1');
+    });
 });

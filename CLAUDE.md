@@ -163,4 +163,14 @@ Production has **no `DELETE` and no DDL** (`CREATE`/`ALTER`/`DROP`). Implication
   `Cajones` controller scoped + gated by `permission:propiedades.manage`, casa selector,
   tipo (asignado/visita/comun) and techado. `partials/propiedades_nav` now has
   Torres · Casas · Cajones. **F1 Propiedades = Torres + Casas + Cajones, all done.**
-  Next F1 area: Personas (dueños/inquilinos) + ocupaciones.
+- **Personas (step 1 — base registry) done:** `PersonaModel` (scoped, soft deletes,
+  contact + CFDI receptor fields, `fullName()` helper), `Personas` controller gated by
+  `permission:personas.manage` with **photo upload** (validated, stored under
+  `public/uploads/personas/`, served via `base_url()`; uploads git-ignored). Avatars in
+  list (photo or initial). Added to main nav. Verified incl. tenant isolation + image serving.
+- **File uploads:** images go to `public/uploads/<entity>/` (web-servable). The
+  `public/uploads/` tree is git-ignored except `.gitkeep`. Validate with
+  `is_image|mime_in|max_size`; move with `getRandomName()`.
+- **Personas roadmap (by steps):** step 1 base registry ✅ → step 2 owners↔casas
+  (`casa_propietarios`, co-ownership %) → step 3 occupancy (`ocupaciones` + `ocupantes`,
+  principal/secundario, uso propio/renta_lineal/renta_vacacional).
