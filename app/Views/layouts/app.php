@@ -9,8 +9,13 @@
         * { box-sizing: border-box; }
         body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background:#f1f5f9; color:#0f172a; }
         header.topbar { background:var(--bg); color:#fff; display:flex; align-items:center; justify-content:space-between; padding:0 1.25rem; height:56px; }
-        header.topbar .brand { font-weight:700; letter-spacing:.5px; }
+        header.topbar .topbar-left { display:flex; align-items:center; gap:1.25rem; height:100%; }
+        header.topbar .brand { font-weight:700; letter-spacing:.5px; color:#fff; text-decoration:none; }
         header.topbar .brand span { color:#5eead4; }
+        header.topbar nav.mainnav { display:flex; align-items:center; gap:.25rem; height:100%; }
+        header.topbar nav.mainnav a { color:#cbd5e1; text-decoration:none; font-size:.9rem; padding:.4rem .7rem; border-radius:8px; line-height:1; }
+        header.topbar nav.mainnav a:hover { color:#fff; background:#1e293b; }
+        header.topbar nav.mainnav a.active { color:#fff; background:#0d9488; font-weight:600; }
         header.topbar .user { display:flex; align-items:center; gap:.75rem; font-size:.9rem; }
         header.topbar .user a { color:#cbd5e1; text-decoration:none; }
         header.topbar .user a:hover { color:#fff; }
@@ -49,9 +54,29 @@
     <?= $this->renderSection('head') ?>
 </head>
 <body>
+    <?php $isAuthed = function_exists('auth') && auth()->loggedIn(); ?>
     <header class="topbar">
-        <div class="brand">erp<span>Kaan</span></div>
-        <?php if (function_exists('auth') && auth()->loggedIn()): ?>
+        <div class="topbar-left">
+            <a class="brand" href="<?= site_url($isAuthed ? 'dashboard' : '/') ?>">erp<span>Kaan</span></a>
+            <?php if ($isAuthed): ?>
+                <?php
+                $u    = auth()->user();
+                $menu = [
+                    ['label' => 'Inicio',      'url' => site_url('dashboard'),   'active' => url_is('dashboard'),                       'show' => true],
+                    ['label' => 'Condominios', 'url' => site_url('condominios'), 'active' => url_is('condominios*'),                    'show' => $u->can('condominios.manage')],
+                    ['label' => 'Propiedades', 'url' => site_url('casas'),       'active' => url_is('casas*') || url_is('torres*'),     'show' => $u->can('propiedades.manage')],
+                ];
+                ?>
+                <nav class="mainnav">
+                    <?php foreach ($menu as $item): ?>
+                        <?php if ($item['show']): ?>
+                            <a href="<?= $item['url'] ?>" class="<?= $item['active'] ? 'active' : '' ?>"><?= esc($item['label']) ?></a>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+                </nav>
+            <?php endif; ?>
+        </div>
+        <?php if ($isAuthed): ?>
             <?php
             $tenant      = service('tenant');
             $allowed     = $tenant->allowedCondominios();
