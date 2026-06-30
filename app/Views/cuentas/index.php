@@ -20,13 +20,6 @@
     </ul></div>
 <?php endif; ?>
 
-<?php if (session('invite_link')): ?>
-    <div class="alert success">
-        <strong>Enlace de invitación (válido 14 días):</strong><br>
-        <code style="word-break:break-all;"><?= esc(session('invite_link')) ?></code>
-    </div>
-<?php endif; ?>
-
 <?php if ($account !== null): ?>
     <div class="card">
         <h2 style="margin:0 0 .5rem; font-size:1.05rem;">✅ Cuenta activa</h2>
@@ -37,9 +30,17 @@
     </div>
 <?php else: ?>
     <?php if ($invitacion !== null): ?>
-        <div class="alert success" style="background:#fef9c3; color:#854d0e;">
-            Hay una invitación pendiente (rol <strong><?= esc($invitacion['rol']) ?></strong>).
-            Enlace: <code style="word-break:break-all;"><?= esc(site_url('registro/' . $invitacion['token'])) ?></code>
+        <?php $invLink = site_url('registro/' . $invitacion['token']); ?>
+        <div class="card" style="background:#fefce8; border-color:#fde68a; margin-bottom:1rem;">
+            <h2 style="margin:0 0 .4rem; font-size:1rem; color:#854d0e;">Invitación pendiente
+                <span class="muted" style="font-weight:400;">(rol <?= esc($invitacion['rol']) ?>, válida 14 días)</span></h2>
+            <p class="muted" style="margin:0 0 .5rem; font-size:.85rem;">Comparte este enlace con el residente para que cree su contraseña:</p>
+            <div style="display:flex; gap:.5rem; align-items:center;">
+                <input type="text" readonly value="<?= esc($invLink) ?>" id="invite-link"
+                       onclick="this.select()" style="flex:1; padding:.5rem .6rem; border:1px solid #cbd5e1; border-radius:8px; font-size:.85rem; background:#fff;">
+                <button type="button" class="btn small" id="copy-invite"
+                        onclick="navigator.clipboard.writeText(document.getElementById('invite-link').value).then(()=>{var b=document.getElementById('copy-invite');b.textContent='¡Copiado!';setTimeout(()=>b.textContent='Copiar',1500);})">Copiar</button>
+            </div>
         </div>
     <?php endif; ?>
 

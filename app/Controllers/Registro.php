@@ -58,6 +58,11 @@ class Registro extends BaseController
 
         $this->invitaciones->update($inv['id'], ['used_at' => date('Y-m-d H:i:s')]);
 
+        // Drop any existing session (e.g. an admin testing the link) before
+        // signing in as the new resident — Shield forbids login while logged in.
+        if (auth()->loggedIn()) {
+            auth()->logout();
+        }
         auth()->login($result['user']); // auto sign-in
 
         return redirect()->to('portal')->with('success', '¡Cuenta creada! Bienvenido a erpKaan.');

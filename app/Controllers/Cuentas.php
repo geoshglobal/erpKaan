@@ -93,8 +93,7 @@ class Cuentas extends BaseController
         ]);
 
         return redirect()->to('personas/' . $personaId . '/cuenta')
-            ->with('success', 'Invitación generada. Comparte el enlace con el residente.')
-            ->with('invite_link', site_url('registro/' . $token));
+            ->with('success', 'Invitación generada. Comparte el enlace con el residente.');
     }
 
     private function personaScoped(int $personaId): ?array
