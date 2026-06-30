@@ -226,6 +226,16 @@ notifications = **in-app → email → push** · visits = **immediate AND schedu
 - **Flash messages:** rendered ONCE by the layout (`layouts/app.php`) — views must NOT
   re-render `session('success')`/`session('error')` (only `session('errors')`, the
   validation array, which the layout doesn't show).
+- **F2.2 caseta panel done:** `Caseta` controller (gated `caseta.operate`, tenant-scoped):
+  check-in (programado/vencido → ingresado, stamps check_in_at + caseta_user_id) and
+  check-out (ingresado → finalizado, stamps check_out_at), each logging an `acceso_eventos`
+  row. Camera QR scanner at `caseta/escaner` (html5-qrcode CDN; works on localhost secure
+  context) navigates to the scanned pass URL (validated against our `pase/` prefix to avoid
+  open redirect). Check-in/out buttons appear on the public pass when a caseta operator is
+  logged in (`Pase` passes `canOperate`) and on the accesos detail; `partials/caseta_actions`
+  renders the right button per estado. Verified: check-in/out, timeline, anon sees no
+  controls, non-caseta blocked. **F2 core = F2.0–F2.2 done.** Remaining: F2.3 paquetería/
+  delivery, F2.4 notifications, F2.5 guest access.
 
 **Sub-steps:** F2.0 resident accounts (prereq — residents need Shield logins linked to
 personas) → F2.1 accesos model + resident visit + QR → F2.2 caseta panel (scan/validate,

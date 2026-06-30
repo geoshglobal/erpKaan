@@ -42,6 +42,13 @@ $routes->group('', ['filter' => 'session'], static function (RouteCollection $ro
         $routes->get('(:num)', 'Accesos::detail/$1');
     });
 
+    // Caseta operations: scan + register entry/exit.
+    $routes->group('caseta', ['filter' => 'permission:caseta.operate'], static function (RouteCollection $routes): void {
+        $routes->get('escaner', 'Caseta::escaner');
+        $routes->post('accesos/(:num)/checkin', 'Caseta::checkin/$1');
+        $routes->post('accesos/(:num)/checkout', 'Caseta::checkout/$1');
+    });
+
     // Condominios management — platform level (superadmin via permission).
     $routes->group('condominios', ['filter' => 'permission:condominios.manage'], static function (RouteCollection $routes): void {
         $routes->get('/', 'Condominios::index');

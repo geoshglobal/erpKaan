@@ -29,6 +29,10 @@ $tipos  = ['visita' => 'Visita', 'paqueteria' => 'Paquetería', 'delivery' => 'D
         <p style="margin:.5rem 0 0;"><span class="pill <?= in_array($estado, ['programado', 'ingresado'], true) ? 'on' : 'off' ?>"><?= esc(AccesoModel::ESTADOS[$estado] ?? $estado) ?></span></p>
         <?php if ($acceso['check_in_at']): ?><p class="muted" style="margin:.5rem 0 0; font-size:.85rem;">Entrada: <?= esc($acceso['check_in_at']) ?></p><?php endif; ?>
         <?php if ($acceso['check_out_at']): ?><p class="muted" style="margin:.1rem 0 0; font-size:.85rem;">Salida: <?= esc($acceso['check_out_at']) ?></p><?php endif; ?>
+
+        <?php if (auth()->user()->can('caseta.operate')): ?>
+            <?= $this->include('partials/caseta_actions', ['acceso' => $acceso]) ?>
+        <?php endif; ?>
     </div>
 
     <div class="card">

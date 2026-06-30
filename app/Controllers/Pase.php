@@ -20,11 +20,17 @@ class Pase extends BaseController
 
         $casa = (new CasaModel())->find($acceso['casa_id']);
 
+        // A logged-in caseta operator of this condominio can register entry/exit.
+        $canOperate = auth()->loggedIn()
+            && auth()->user()->can('caseta.operate')
+            && (int) $acceso['condominio_id'] === (int) service('tenant')->activeId();
+
         return view('pase/show', [
-            'title'     => 'Pase de acceso',
-            'acceso'    => $acceso,
-            'casaIdent' => $casa['identificador'] ?? '',
-            'passUrl'   => site_url('pase/' . $acceso['qr_token']),
+            'title'      => 'Pase de acceso',
+            'acceso'     => $acceso,
+            'casaIdent'  => $casa['identificador'] ?? '',
+            'passUrl'    => site_url('pase/' . $acceso['qr_token']),
+            'canOperate' => $canOperate,
         ]);
     }
 }

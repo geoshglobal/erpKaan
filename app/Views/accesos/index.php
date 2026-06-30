@@ -6,6 +6,9 @@
 
 <div class="page-head">
     <h1>Accesos del condominio</h1>
+    <?php if (auth()->user()->can('caseta.operate')): ?>
+        <a class="btn" href="<?= site_url('caseta/escaner') ?>">📷 Escanear QR</a>
+    <?php endif; ?>
 </div>
 
 <?php

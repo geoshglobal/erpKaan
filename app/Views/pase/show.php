@@ -5,9 +5,17 @@
 <div style="margin:1.5rem auto 0; max-width:440px;">
     <h1 style="text-align:center; margin-bottom:1rem;">Pase de acceso</h1>
     <?= $this->include('partials/pase_card', ['acceso' => $acceso, 'casaIdent' => $casaIdent, 'passUrl' => $passUrl]) ?>
-    <p class="muted" style="text-align:center; font-size:.82rem; margin-top:1rem;">
-        Presenta este código en la caseta de acceso.
-    </p>
+
+    <?php if (! empty($canOperate)): ?>
+        <div class="card" style="margin-top:1rem; text-align:center; border-color:#0d9488;">
+            <div class="muted" style="font-size:.82rem; margin-bottom:.25rem;">Caseta</div>
+            <?= $this->include('partials/caseta_actions', ['acceso' => $acceso]) ?>
+        </div>
+    <?php else: ?>
+        <p class="muted" style="text-align:center; font-size:.82rem; margin-top:1rem;">
+            Presenta este código en la caseta de acceso.
+        </p>
+    <?php endif; ?>
 </div>
 
 <?= $this->endSection() ?>
