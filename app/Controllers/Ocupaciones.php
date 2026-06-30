@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\CasaModel;
+use App\Models\InvitacionModel;
 use App\Models\OcupacionModel;
 use App\Models\OcupanteModel;
 use App\Models\PersonaModel;
@@ -18,13 +19,15 @@ class Ocupaciones extends BaseController
     private PersonaModel $personas;
     private OcupacionModel $model;
     private OcupanteModel $ocupantes;
+    private InvitacionModel $invitaciones;
 
     public function __construct()
     {
-        $this->casas     = new CasaModel();
-        $this->personas  = new PersonaModel();
-        $this->model     = new OcupacionModel();
-        $this->ocupantes = new OcupanteModel();
+        $this->casas        = new CasaModel();
+        $this->personas     = new PersonaModel();
+        $this->model        = new OcupacionModel();
+        $this->ocupantes    = new OcupanteModel();
+        $this->invitaciones = new InvitacionModel();
     }
 
     public function index(int $casaId): string|RedirectResponse
@@ -104,9 +107,10 @@ class Ocupaciones extends BaseController
             'title'     => 'Editar ocupación — ' . $casa['identificador'],
             'casa'      => $casa,
             'ocupacion' => $ocupacion,
-            'action'    => site_url('casas/' . $casaId . '/ocupaciones/' . $ocupId),
-            'ocupantes' => $this->ocupantes->ofOcupacion($ocupId),
-            'personas'  => $this->personasList(),
+            'action'      => site_url('casas/' . $casaId . '/ocupaciones/' . $ocupId),
+            'ocupantes'   => $this->ocupantes->ofOcupacion($ocupId),
+            'personas'    => $this->personasList(),
+            'invitaciones' => $this->invitaciones->pendingForOcupacion($ocupId),
         ]);
     }
 
@@ -187,6 +191,50 @@ class Ocupaciones extends BaseController
 
         return redirect()->to('casas/' . $casaId . '/ocupaciones/' . $ocupId . '/editar')
             ->with('success', 'Ocupante principal actualizado.');
+    }
+
+    public function invitarOcupante(int $casaId, int $ocupId): RedirectResponse
+    {
+        $back = 'casas/' . $casaId . '/ocupaciones/' . $ocupId . '/editar';
+        if ($this->casaScoped($casaId) === null || $this->ocupacionScoped($casaId, $ocupId) === null) {
+            return redirect()->to('casas/' . $casaId . '/ocupaciones')->with('error', 'Ocupación no encontrada.');
+        }
+
+        $rolOcupante = $this->request->getPost('rol_ocupante') === 'principal' ? 'principal' : 'secundario';
+        $rolLogin    = in_array($this->request->getPost('rol'), ['dueno', 'inquilino', 'huesped'], true)
+            ? $this->request->getPost('rol') : 'inquilino';
+
+        $personaId = (int) $this->request->getPost('persona_id') ?: null;
+        $nombre    = $this->request->getPost('nombre') ?: null;
+        $email     = $this->request->getPost('email') ?: null;
+
+        if ($personaId !== null) {
+            $p = $this->personaScoped($personaId);
+            if ($p === null) {
+                return redirect()->to($back)->with('error', 'Persona inválida.');
+            }
+            if (! empty($p['user_id'])) {
+                return redirect()->to($back)->with('error', 'Esa persona ya tiene cuenta; agrégala directamente como ocupante.');
+            }
+            $nombre ??= PersonaModel::fullName($p);
+            $email  ??= $p['email'];
+        }
+
+        $this->invitaciones->insert([
+            'condominio_id'      => $this->activeCondominioId(),
+            'tipo'               => 'ocupante',
+            'persona_id'         => $personaId,
+            'ocupacion_id'       => $ocupId,
+            'token'              => bin2hex(random_bytes(24)),
+            'rol'                => $rolLogin,
+            'rol_ocupante'       => $rolOcupante,
+            'nombre'             => $nombre,
+            'email'              => $email,
+            'expires_at'         => date('Y-m-d H:i:s', time() + 14 * 86400),
+            'created_by_user_id' => auth()->id(),
+        ]);
+
+        return redirect()->to($back)->with('success', 'Invitación de ocupante generada. Comparte el enlace.');
     }
 
     public function removeOcupante(int $casaId, int $ocupId, int $ocupanteId): RedirectResponse

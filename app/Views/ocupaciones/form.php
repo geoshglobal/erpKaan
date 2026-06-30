@@ -156,6 +156,77 @@ $isEdit  = is_array($ocupacion ?? null);
                 <?php endif; ?>
             </fieldset>
         </form>
+
+        <hr style="border:none; border-top:1px solid #e2e8f0; margin:1.25rem 0;">
+
+        <h3 style="margin:0 0 .5rem; font-size:1rem;">Invitar ocupante con cuenta</h3>
+        <p class="muted" style="margin-top:0; font-size:.85rem;">Genera un enlace para que el ocupante cree su cuenta
+            (necesaria para generar pases QR). Se ligará a esta casa automáticamente.</p>
+
+        <?php $pendientes = array_values(array_filter($invitaciones, static fn ($i) => $i['tipo'] === 'ocupante')); ?>
+        <?php if ($pendientes !== []): ?>
+            <?php foreach ($pendientes as $idx => $inv): ?>
+                <?php $link = site_url('registro/' . $inv['token']); ?>
+                <div style="background:#fefce8; border:1px solid #fde68a; border-radius:8px; padding:.6rem .8rem; margin-bottom:.6rem;">
+                    <div class="muted" style="font-size:.82rem; margin-bottom:.35rem;">
+                        Pendiente — <?= esc($inv['nombre'] ?: $inv['email'] ?: 'nuevo ocupante') ?>
+                        (<?= esc($inv['rol_ocupante']) ?>, login <?= esc($inv['rol']) ?>)
+                    </div>
+                    <div style="display:flex; gap:.5rem;">
+                        <input type="text" readonly value="<?= esc($link) ?>" id="inv-<?= $idx ?>" onclick="this.select()"
+                               style="flex:1; padding:.4rem .5rem; border:1px solid #cbd5e1; border-radius:6px; font-size:.8rem; background:#fff;">
+                        <button type="button" class="btn small" id="invbtn-<?= $idx ?>"
+                                onclick="navigator.clipboard.writeText(document.getElementById('inv-<?= $idx ?>').value).then(()=>{var b=document.getElementById('invbtn-<?= $idx ?>');b.textContent='¡Copiado!';setTimeout(()=>b.textContent='Copiar',1500);})">Copiar</button>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        <?php endif; ?>
+
+        <form method="post" action="<?= site_url('casas/' . $casa['id'] . '/ocupaciones/' . $ocupacion['id'] . '/invitar-ocupante') ?>">
+            <?= csrf_field() ?>
+            <fieldset>
+                <legend>Nueva invitación</legend>
+                <div class="grid2">
+                    <div class="field">
+                        <label>Rol del ocupante</label>
+                        <select name="rol_ocupante">
+                            <option value="secundario">Secundario</option>
+                            <option value="principal">Principal</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Rol de acceso (login)</label>
+                        <select name="rol">
+                            <option value="inquilino">inquilino</option>
+                            <option value="dueno">dueno</option>
+                            <option value="huesped">huesped</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="field">
+                    <label>Persona existente (sin cuenta) — opcional</label>
+                    <select name="persona_id">
+                        <option value="">— Nueva persona (captura sus datos al registrarse) —</option>
+                        <?php foreach ($personas as $p): ?>
+                            <?php if (empty($p['user_id'])): ?>
+                                <option value="<?= (int) $p['id'] ?>"><?= esc(\App\Models\PersonaModel::fullName($p)) ?></option>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="grid2">
+                    <div class="field">
+                        <label>Nombre sugerido (si es nueva)</label>
+                        <input type="text" name="nombre" placeholder="Opcional">
+                    </div>
+                    <div class="field">
+                        <label>Correo sugerido</label>
+                        <input type="email" name="email" placeholder="Opcional">
+                    </div>
+                </div>
+                <button type="submit" class="btn secondary">Generar invitación</button>
+            </fieldset>
+        </form>
     </div>
 <?php endif; ?>
 

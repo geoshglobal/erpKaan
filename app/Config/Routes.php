@@ -62,6 +62,7 @@ $routes->group('', ['filter' => 'session'], static function (RouteCollection $ro
         $routes->post('(:num)/ocupaciones/(:num)', 'Ocupaciones::update/$1/$2');
         $routes->post('(:num)/ocupaciones/(:num)/eliminar', 'Ocupaciones::delete/$1/$2');
         $routes->post('(:num)/ocupaciones/(:num)/ocupantes', 'Ocupaciones::addOcupante/$1/$2');
+        $routes->post('(:num)/ocupaciones/(:num)/invitar-ocupante', 'Ocupaciones::invitarOcupante/$1/$2');
         $routes->post('(:num)/ocupaciones/(:num)/ocupantes/(:num)/principal', 'Ocupaciones::principalOcupante/$1/$2/$3');
         $routes->post('(:num)/ocupaciones/(:num)/ocupantes/(:num)/eliminar', 'Ocupaciones::removeOcupante/$1/$2/$3');
     });
