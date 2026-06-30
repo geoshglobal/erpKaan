@@ -42,6 +42,7 @@ $usoLabels = [
                     <td><?= $c['m2'] !== null ? esc($c['m2']) : '—' ?></td>
                     <td><span class="pill <?= $c['activo'] ? 'on' : 'off' ?>"><?= $c['activo'] ? 'Activa' : 'Inactiva' ?></span></td>
                     <td style="text-align:right; white-space:nowrap;">
+                        <a class="btn secondary small" href="<?= site_url('casas/' . $c['id'] . '/propietarios') ?>">Dueños</a>
                         <a class="btn secondary small" href="<?= site_url('casas/' . $c['id'] . '/editar') ?>">Editar</a>
                         <form method="post" action="<?= site_url('casas/' . $c['id'] . '/eliminar') ?>"
                               style="display:inline;" onsubmit="return confirm('¿Eliminar esta casa?');">

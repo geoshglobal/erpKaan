@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Models\CasaPropietarioModel;
 use App\Models\PersonaModel;
 use CodeIgniter\HTTP\RedirectResponse;
 
@@ -60,9 +61,10 @@ class Personas extends BaseController
         }
 
         return view('personas/form', [
-            'title'   => 'Editar persona',
-            'persona' => $persona,
-            'action'  => site_url('personas/' . $id),
+            'title'       => 'Editar persona',
+            'persona'     => $persona,
+            'action'      => site_url('personas/' . $id),
+            'propiedades' => (new CasaPropietarioModel())->casasOfPersona($id),
         ]);
     }
 

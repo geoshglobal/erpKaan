@@ -171,6 +171,12 @@ Production has **no `DELETE` and no DDL** (`CREATE`/`ALTER`/`DROP`). Implication
 - **File uploads:** images go to `public/uploads/<entity>/` (web-servable). The
   `public/uploads/` tree is git-ignored except `.gitkeep`. Validate with
   `is_image|mime_in|max_size`; move with `getRandomName()`.
-- **Personas roadmap (by steps):** step 1 base registry ✅ → step 2 owners↔casas
-  (`casa_propietarios`, co-ownership %) → step 3 occupancy (`ocupaciones` + `ocupantes`,
-  principal/secundario, uso propio/renta_lineal/renta_vacacional).
+- **Personas step 2 — owners↔casas done:** `CasaPropietarioModel` (ownersOfCasa,
+  casasOfPersona, isOwner, clearPrincipal). Managed from the casa: `Casas list → Dueños`
+  → `Propietarios` controller (nested routes `casas/(:num)/propietarios[...]`, gated by
+  propiedades.manage, fully tenant-scoped). Add owner (persona + %, fecha, principal),
+  toggle principal (single-principal invariant via clearPrincipal), remove (soft delete),
+  duplicate guard. Persona edit page shows an owned-casas summary. Verified incl. isolation.
+- **Personas roadmap (by steps):** step 1 base registry ✅ → step 2 owners↔casas ✅ →
+  step 3 occupancy (`ocupaciones` + `ocupantes`, principal/secundario, uso
+  propio/renta_lineal/renta_vacacional).

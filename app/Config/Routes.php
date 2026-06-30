@@ -42,6 +42,12 @@ $routes->group('', ['filter' => 'session'], static function (RouteCollection $ro
         $routes->get('(:num)/editar', 'Casas::edit/$1');
         $routes->post('(:num)', 'Casas::update/$1');
         $routes->post('(:num)/eliminar', 'Casas::delete/$1');
+
+        // Owners of a casa (casa_propietarios).
+        $routes->get('(:num)/propietarios', 'Propietarios::index/$1');
+        $routes->post('(:num)/propietarios', 'Propietarios::store/$1');
+        $routes->post('(:num)/propietarios/(:num)/principal', 'Propietarios::principal/$1/$2');
+        $routes->post('(:num)/propietarios/(:num)/eliminar', 'Propietarios::destroy/$1/$2');
     });
 
     $routes->group('cajones', ['filter' => 'permission:propiedades.manage'], static function (RouteCollection $routes): void {

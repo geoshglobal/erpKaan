@@ -124,4 +124,30 @@
     </div>
 </form>
 
+<?php if (isset($propiedades)): ?>
+    <div class="card" style="margin-top:1.5rem;">
+        <h2 style="margin:0 0 .75rem; font-size:1.05rem;">Propiedades de esta persona</h2>
+        <?php if ($propiedades === []): ?>
+            <p class="muted" style="margin:0;">No es propietaria de ninguna casa todavía. Las asignaciones se hacen
+                desde <a href="<?= site_url('casas') ?>">Casas → Dueños</a>.</p>
+        <?php else: ?>
+            <table class="grid">
+                <thead><tr><th>Casa</th><th>%</th><th>Principal</th><th style="text-align:right;"></th></tr></thead>
+                <tbody>
+                    <?php foreach ($propiedades as $pr): ?>
+                        <tr>
+                            <td><strong><?= esc($pr['identificador']) ?></strong></td>
+                            <td><?= esc(rtrim(rtrim((string) $pr['porcentaje'], '0'), '.')) ?>%</td>
+                            <td><?= (int) $pr['principal'] === 1 ? '<span class="pill on">Principal</span>' : '<span class="muted">—</span>' ?></td>
+                            <td style="text-align:right;">
+                                <a class="btn secondary small" href="<?= site_url('casas/' . $pr['casa_id'] . '/propietarios') ?>">Ver casa</a>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        <?php endif; ?>
+    </div>
+<?php endif; ?>
+
 <?= $this->endSection() ?>
