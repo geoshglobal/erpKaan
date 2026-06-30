@@ -24,4 +24,23 @@ $routes->group('', ['filter' => 'session'], static function (RouteCollection $ro
         $routes->post('(:num)', 'Condominios::update/$1');
         $routes->post('(:num)/eliminar', 'Condominios::delete/$1');
     });
+
+    // Propiedades — scoped to the active condominio.
+    $routes->group('torres', ['filter' => 'permission:propiedades.manage'], static function (RouteCollection $routes): void {
+        $routes->get('/', 'Torres::index');
+        $routes->get('nueva', 'Torres::new');
+        $routes->post('/', 'Torres::create');
+        $routes->get('(:num)/editar', 'Torres::edit/$1');
+        $routes->post('(:num)', 'Torres::update/$1');
+        $routes->post('(:num)/eliminar', 'Torres::delete/$1');
+    });
+
+    $routes->group('casas', ['filter' => 'permission:propiedades.manage'], static function (RouteCollection $routes): void {
+        $routes->get('/', 'Casas::index');
+        $routes->get('nueva', 'Casas::new');
+        $routes->post('/', 'Casas::create');
+        $routes->get('(:num)/editar', 'Casas::edit/$1');
+        $routes->post('(:num)', 'Casas::update/$1');
+        $routes->post('(:num)/eliminar', 'Casas::delete/$1');
+    });
 });

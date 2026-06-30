@@ -145,3 +145,15 @@ Production has **no `DELETE` and no DDL** (`CREATE`/`ALTER`/`DROP`). Implication
   auto-gen, CFDI fields, validation), `Condominios` controller gated by
   `permission:condominios.manage`, views under `app/Views/condominios/`. Verified
   list/create end-to-end. UI uses a shared layout `app/Views/layouts/app.php`.
+- **Map picker:** condominio form embeds Leaflet + OSM with a draggable marker;
+  `latitud`/`longitud` columns; initial center geocoded from país/estado/CP via
+  Nominatim. Layout exposes `head` + `scripts` render sections for per-view assets.
+- **Torres + Casas CRUD done** (scoped to active condominio via `service('tenant')`):
+  `TorreModel`, `CasaModel` (+ `withTorre()` join), controllers gated by
+  `permission:propiedades.manage`, `findScoped()` enforces tenant isolation on
+  edit/update/delete, views under `app/Views/{torres,casas}/` with a shared
+  `partials/propiedades_nav`. Verified isolation: rows of one condominio are invisible
+  (and uneditable) under another.
+- **is_unique on edit:** CI4 requires the `{id}` placeholder field to have its own
+  validation rule (`'id' => 'permit_empty|is_natural_no_zero'`) AND the id passed in
+  the update data. Pattern applied to `CondominioModel`/`Condominios::update`.

@@ -60,7 +60,11 @@ class Condominios extends BaseController
             return redirect()->to('condominios')->with('error', 'Condominio no encontrado.');
         }
 
-        if (! $this->model->update($id, $this->payload())) {
+        // Include the id so the is_unique[...,{id}] placeholder excludes this row.
+        $data       = $this->payload();
+        $data['id'] = $id;
+
+        if (! $this->model->update($id, $data)) {
             return redirect()->back()->withInput()->with('errors', $this->model->errors());
         }
 

@@ -42,4 +42,12 @@ abstract class BaseController extends Controller
         // Preload any models, libraries, etc, here.
         // $this->session = service('session');
     }
+
+    /**
+     * Active condominio id for the current user (tenant context), or null.
+     */
+    protected function activeCondominioId(): ?int
+    {
+        return service('tenant')->activeId();
+    }
 }

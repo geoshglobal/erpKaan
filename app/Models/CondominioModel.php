@@ -25,6 +25,7 @@ class CondominioModel extends Model
     ];
 
     protected $validationRules = [
+        'id'       => 'permit_empty|is_natural_no_zero',
         'nombre'   => 'required|max_length[150]',
         'slug'     => 'permit_empty|alpha_dash|max_length[160]|is_unique[condominios.slug,id,{id}]',
         'email'    => 'permit_empty|valid_email|max_length[150]',
