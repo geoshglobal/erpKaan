@@ -61,8 +61,15 @@ $usos = ['propio' => 'Uso propio', 'renta_lineal' => 'Renta lineal', 'renta_vaca
         </div>
     </div>
 
+    <div class="card" style="margin-top:1rem;">
+        <h3 style="margin:0 0 .5rem; font-size:1rem;">🎫 Visitas</h3>
+        <p class="muted" style="margin:.2rem 0 .75rem; font-size:.9rem;">Genera pases QR para tus visitantes.</p>
+        <a class="btn" href="<?= site_url('portal/visitas') ?>">Mis visitas</a>
+        <a class="btn secondary" href="<?= site_url('portal/visitas/nueva') ?>">+ Nueva visita</a>
+    </div>
+
     <p class="muted" style="margin-top:1.5rem; font-size:.85rem;">
-        Próximamente aquí podrás generar pases QR de visita y avisar paquetería. 🚧
+        Próximamente: avisos de paquetería y delivery. 🚧
     </p>
 <?php endif; ?>
 

@@ -12,12 +12,21 @@ service('auth')->routes($routes);
 $routes->get('registro/(:segment)', 'Registro::show/$1');
 $routes->post('registro/(:segment)', 'Registro::register/$1');
 
+// Public visit pass (what the QR opens).
+$routes->get('pase/(:segment)', 'Pase::show/$1');
+
 // Authenticated area
 $routes->group('', ['filter' => 'session'], static function (RouteCollection $routes): void {
     $routes->get('dashboard', 'Dashboard::index');
     $routes->get('portal', 'Portal::index');
     $routes->get('portal/perfil', 'Portal::perfil');
     $routes->post('portal/perfil', 'Portal::updatePerfil');
+    // Resident visits (tipo=visita) + QR pass.
+    $routes->get('portal/visitas', 'Visitas::index');
+    $routes->get('portal/visitas/nueva', 'Visitas::new');
+    $routes->post('portal/visitas', 'Visitas::create');
+    $routes->get('portal/visitas/(:num)', 'Visitas::pase/$1');
+    $routes->post('portal/visitas/(:num)/cancelar', 'Visitas::cancelar/$1');
     // Principal manages occupants of their own casa.
     $routes->get('portal/ocupacion/(:num)/ocupantes', 'Portal::ocupantes/$1');
     $routes->post('portal/ocupacion/(:num)/ocupantes', 'Portal::addOcupante/$1');

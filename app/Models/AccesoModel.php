@@ -1,0 +1,71 @@
+<?php
+
+namespace App\Models;
+
+use CodeIgniter\Model;
+
+class AccesoModel extends Model
+{
+    protected $table          = 'accesos';
+    protected $primaryKey     = 'id';
+    protected $returnType     = 'array';
+    protected $useSoftDeletes = true;
+    protected $useTimestamps  = true;
+    protected $dateFormat     = 'datetime';
+    protected $deletedField   = 'deleted_at';
+
+    protected $allowedFields = [
+        'condominio_id', 'casa_id', 'tipo', 'solicitante_persona_id', 'creado_por_user_id',
+        'nombre_visitante', 'empresa', 'telefono', 'num_personas', 'placas', 'foto_path',
+        'qr_token', 'valido_desde', 'valido_hasta', 'estado',
+        'check_in_at', 'check_out_at', 'caseta_user_id', 'notas',
+    ];
+
+    protected $validationRules = [
+        'condominio_id'    => 'required|is_natural_no_zero',
+        'casa_id'          => 'required|is_natural_no_zero',
+        'tipo'             => 'permit_empty|in_list[visita,paqueteria,delivery,proveedor]',
+        'nombre_visitante' => 'required|max_length[150]',
+        'num_personas'     => 'permit_empty|is_natural_no_zero',
+        'valido_desde'     => 'permit_empty|valid_date[Y-m-d H:i:s]',
+        'valido_hasta'     => 'permit_empty|valid_date[Y-m-d H:i:s]',
+    ];
+
+    public const ESTADOS = [
+        'programado' => 'Programado',
+        'ingresado'  => 'Ingresó',
+        'finalizado' => 'Finalizó',
+        'cancelado'  => 'Cancelado',
+        'vencido'    => 'Vencido',
+    ];
+
+    public function byToken(string $token): ?array
+    {
+        return $this->where('qr_token', $token)->first();
+    }
+
+    /** Visits requested by a persona (most recent first). @return list<array<string,mixed>> */
+    public function forSolicitante(int $personaId): array
+    {
+        return $this->select('accesos.*, casas.identificador AS casa_ident')
+            ->join('casas', 'casas.id = accesos.casa_id', 'left')
+            ->where('accesos.solicitante_persona_id', $personaId)
+            ->orderBy('accesos.id', 'DESC')
+            ->findAll();
+    }
+
+    /**
+     * Display status, deriving "vencido" for still-programmed visits whose
+     * validity window has passed (without mutating the stored row).
+     */
+    public static function estadoEfectivo(array $acceso): string
+    {
+        if ($acceso['estado'] === 'programado'
+            && ! empty($acceso['valido_hasta'])
+            && strtotime($acceso['valido_hasta']) < time()) {
+            return 'vencido';
+        }
+
+        return $acceso['estado'];
+    }
+}

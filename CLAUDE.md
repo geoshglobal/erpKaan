@@ -209,6 +209,16 @@ notifications = **in-app → email → push** · visits = **immediate AND schedu
 → finalizado (check-out, notify "salió")` + `cancelado/vencido`; paquetería
 `en_caseta (notify) → entregado` + `cancelado`.
 
+- **F2.1 visit + QR done:** `accesos` (core request/event) + `acceso_eventos` (status-change
+  audit log). `AccesoModel` (estados programado/ingresado/finalizado/cancelado/vencido;
+  `estadoEfectivo()` derives "vencido" at display time) + `AccesoEventoModel`. Resident
+  `Visitas` controller: list/create visits scoped to their own casas (owned+occupied),
+  vigencia immediate (today) or scheduled window, generates a random `qr_token`, logs the
+  event; cancel. Pass view renders the QR client-side via `qrcode-generator` (CDN, no
+  dependency) encoding the public `pase/{token}` URL. Public `Pase` controller shows a
+  read-only pass (what the QR opens; caseta check-in lands here in F2.2). Verified: create,
+  QR, public pass, cancel, cross-resident isolation.
+
 **Sub-steps:** F2.0 resident accounts (prereq — residents need Shield logins linked to
 personas) → F2.1 accesos model + resident visit + QR → F2.2 caseta panel (scan/validate,
 check-in/out, status) → F2.3 paquetería + delivery → F2.4 notifications (in-app→email→push)

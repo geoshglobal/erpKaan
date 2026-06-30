@@ -15,7 +15,7 @@ class Dashboard extends BaseController
             ['perm' => 'propiedades.manage',  'title' => 'Propiedades',    'desc' => 'Torres, casas y cajones',                    'url' => site_url('casas')],
             ['perm' => 'personas.manage',     'title' => 'Personas',       'desc' => 'Dueños e inquilinos',                        'url' => site_url('personas')],
             ['perm' => 'ocupaciones.manage',  'title' => 'Ocupaciones',    'desc' => 'Uso propio / renta lineal / vacacional',     'url' => '#'],
-            ['perm' => 'accesos.manage',      'title' => 'Accesos',        'desc' => 'Visitas, QR, paquetería y delivery',         'url' => '#'],
+            ['perm' => 'accesos.manage',      'title' => 'Accesos',        'desc' => 'Visitas, QR, paquetería y delivery',         'url' => site_url('portal/visitas')],
             ['perm' => 'caseta.operate',      'title' => 'Caseta',         'desc' => 'Operación de control de acceso',             'url' => '#'],
             ['perm' => 'finanzas.manage',     'title' => 'Finanzas',       'desc' => 'Cuotas, multas y pagos',                     'url' => '#'],
             ['perm' => 'amenidades.manage',   'title' => 'Amenidades',     'desc' => 'Reserva de áreas comunes',                   'url' => '#'],
