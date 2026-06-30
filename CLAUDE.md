@@ -136,3 +136,12 @@ Production has **no `DELETE` and no DDL** (`CREATE`/`ALTER`/`DROP`). Implication
   `session`) shows a role-aware module grid (cards gated by `user->can(permission)`).
   Login redirect → `/dashboard`. Set `App::$indexPage=''` for clean URLs. Verified
   end-to-end with the superadmin (login 303 → dashboard, all 10 modules visible).
+- **Multi-tenancy = Pool model** (confirmed): shared DB, row-level isolation by
+  `condominio_id`. `service('tenant')` (`App\Libraries\Tenant`) resolves allowed
+  condominios + the active one (session key `active_condominio_id`); topbar selector
+  posts to `condominio/activo` to switch. superadmin sees all; others scoped via
+  `condominio_usuarios` / `personas.condominio_id`.
+- **Condominios CRUD done** (first F1 module): `CondominioModel` (soft deletes, slug
+  auto-gen, CFDI fields, validation), `Condominios` controller gated by
+  `permission:condominios.manage`, views under `app/Views/condominios/`. Verified
+  list/create end-to-end. UI uses a shared layout `app/Views/layouts/app.php`.

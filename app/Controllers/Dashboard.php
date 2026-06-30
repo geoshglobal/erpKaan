@@ -11,7 +11,7 @@ class Dashboard extends BaseController
         // Module cards, each gated by a Shield permission. Until each module is
         // built they point to '#'; the role-based visibility is what we validate here.
         $modules = [
-            ['perm' => 'condominios.manage',  'title' => 'Condominios',   'desc' => 'Alta y configuración de condominios',        'url' => '#'],
+            ['perm' => 'condominios.manage',  'title' => 'Condominios',   'desc' => 'Alta y configuración de condominios',        'url' => site_url('condominios')],
             ['perm' => 'propiedades.manage',  'title' => 'Propiedades',    'desc' => 'Torres, casas y cajones',                    'url' => '#'],
             ['perm' => 'personas.manage',     'title' => 'Personas',       'desc' => 'Dueños e inquilinos',                        'url' => '#'],
             ['perm' => 'ocupaciones.manage',  'title' => 'Ocupaciones',    'desc' => 'Uso propio / renta lineal / vacacional',     'url' => '#'],
