@@ -113,10 +113,114 @@ $activo = (int) $val('activo', 1);
         </div>
     </fieldset>
 
+    <fieldset>
+        <legend>Ubicación en el mapa</legend>
+        <p class="muted" style="margin-top:0; font-size:.85rem;">
+            Haz clic en el mapa o arrastra el marcador para fijar la ubicación. El botón centra
+            el mapa según país, estado y código postal.
+        </p>
+        <button type="button" class="btn secondary small" id="btn-geocode" style="margin-bottom:.6rem;">
+            📍 Centrar según CP
+        </button>
+        <span class="muted" id="geo-status" style="font-size:.8rem; margin-left:.5rem;"></span>
+
+        <div id="map" style="height:340px; border:1px solid #cbd5e1; border-radius:10px;"></div>
+
+        <input type="hidden" name="latitud"  id="latitud"  value="<?= esc($val('latitud')) ?>">
+        <input type="hidden" name="longitud" id="longitud" value="<?= esc($val('longitud')) ?>">
+        <p class="muted" style="font-size:.8rem; margin-bottom:0;">
+            Coordenadas: <span id="coords"><?= $val('latitud') && $val('longitud') ? esc($val('latitud')) . ', ' . esc($val('longitud')) : '— sin definir —' ?></span>
+        </p>
+    </fieldset>
+
     <div class="form-actions">
         <button type="submit" class="btn">Guardar</button>
         <a class="btn secondary" href="<?= site_url('condominios') ?>">Cancelar</a>
     </div>
 </form>
 
+<?= $this->endSection() ?>
+
+<?= $this->section('head') ?>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<?= $this->endSection() ?>
+
+<?= $this->section('scripts') ?>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+(function () {
+    var latInput = document.getElementById('latitud');
+    var lngInput = document.getElementById('longitud');
+    var coords   = document.getElementById('coords');
+    var status   = document.getElementById('geo-status');
+
+    var hasInitial = latInput.value !== '' && lngInput.value !== '';
+    var startLat   = hasInitial ? parseFloat(latInput.value) : 23.6345;   // centroide MX
+    var startLng   = hasInitial ? parseFloat(lngInput.value) : -102.5528;
+    var startZoom  = hasInitial ? 16 : 5;
+
+    var map = L.map('map').setView([startLat, startLng], startZoom);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap'
+    }).addTo(map);
+
+    var marker = null;
+    function setMarker(lat, lng) {
+        if (marker) {
+            marker.setLatLng([lat, lng]);
+        } else {
+            marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+            marker.on('dragend', function (e) {
+                var p = e.target.getLatLng();
+                writeCoords(p.lat, p.lng);
+            });
+        }
+        writeCoords(lat, lng);
+    }
+    function writeCoords(lat, lng) {
+        latInput.value = lat.toFixed(7);
+        lngInput.value = lng.toFixed(7);
+        coords.textContent = latInput.value + ', ' + lngInput.value;
+    }
+
+    if (hasInitial) {
+        setMarker(startLat, startLng);
+    }
+
+    map.on('click', function (e) {
+        setMarker(e.latlng.lat, e.latlng.lng);
+    });
+
+    // Geocode from país + estado + CP (+ municipio) via Nominatim (OSM).
+    document.getElementById('btn-geocode').addEventListener('click', function () {
+        var val = function (name) {
+            var el = document.querySelector('[name="' + name + '"]');
+            return el ? el.value.trim() : '';
+        };
+        var params = new URLSearchParams({ format: 'json', limit: '1', addressdetails: '0' });
+        if (val('pais'))      params.set('countrycodes', val('pais').toLowerCase());
+        if (val('estado'))    params.set('state', val('estado'));
+        if (val('municipio')) params.set('county', val('municipio'));
+        if (val('cp'))        params.set('postalcode', val('cp'));
+
+        status.textContent = 'Buscando…';
+        fetch('https://nominatim.openstreetmap.org/search?' + params.toString(), {
+            headers: { 'Accept': 'application/json' }
+        })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            if (data && data.length) {
+                var lat = parseFloat(data[0].lat), lng = parseFloat(data[0].lon);
+                map.setView([lat, lng], 15);
+                setMarker(lat, lng);
+                status.textContent = 'Ubicación encontrada ✔ (ajusta el marcador si es necesario)';
+            } else {
+                status.textContent = 'No se encontró; ubica manualmente en el mapa.';
+            }
+        })
+        .catch(function () { status.textContent = 'Error al geocodificar; ubica manualmente.'; });
+    });
+})();
+</script>
 <?= $this->endSection() ?>

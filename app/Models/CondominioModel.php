@@ -20,6 +20,7 @@ class CondominioModel extends Model
         'nombre', 'slug', 'direccion', 'colonia', 'municipio', 'estado', 'cp',
         'pais', 'moneda', 'telefono', 'email',
         'razon_social', 'rfc', 'regimen_fiscal', 'cp_fiscal',
+        'latitud', 'longitud',
         'logo_path', 'settings', 'activo',
     ];
 
@@ -31,6 +32,8 @@ class CondominioModel extends Model
         'cp'       => 'permit_empty|max_length[10]',
         'pais'     => 'permit_empty|exact_length[2]',
         'moneda'   => 'permit_empty|exact_length[3]',
+        'latitud'  => 'permit_empty|decimal',
+        'longitud' => 'permit_empty|decimal',
         'activo'   => 'permit_empty|in_list[0,1]',
     ];
 

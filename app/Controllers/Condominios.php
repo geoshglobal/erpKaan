@@ -106,7 +106,9 @@ class Condominios extends BaseController
             'rfc'            => $this->request->getPost('rfc'),
             'regimen_fiscal' => $this->request->getPost('regimen_fiscal'),
             'cp_fiscal'      => $this->request->getPost('cp_fiscal'),
-            'activo'         => $this->request->getPost('activo') !== null ? 1 : 0,
+            'latitud'        => $this->request->getPost('latitud') ?: null,
+            'longitud'       => $this->request->getPost('longitud') ?: null,
+            'activo'         => (int) ($this->request->getPost('activo') ?? 1),
         ];
     }
 }

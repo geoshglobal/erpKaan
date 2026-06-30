@@ -46,6 +46,7 @@
         .tenant-select { display:flex; align-items:center; gap:.4rem; }
         .tenant-select select { background:#1e293b; color:#fff; border:1px solid #334155; border-radius:8px; padding:.3rem .5rem; font-size:.85rem; }
     </style>
+    <?= $this->renderSection('head') ?>
 </head>
 <body>
     <header class="topbar">
@@ -84,5 +85,6 @@
 
         <?= $this->renderSection('content') ?>
     </main>
+    <?= $this->renderSection('scripts') ?>
 </body>
 </html>
