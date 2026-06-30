@@ -16,6 +16,13 @@ $routes->post('registro/(:segment)', 'Registro::register/$1');
 $routes->group('', ['filter' => 'session'], static function (RouteCollection $routes): void {
     $routes->get('dashboard', 'Dashboard::index');
     $routes->get('portal', 'Portal::index');
+    $routes->get('portal/perfil', 'Portal::perfil');
+    $routes->post('portal/perfil', 'Portal::updatePerfil');
+    // Principal manages occupants of their own casa.
+    $routes->get('portal/ocupacion/(:num)/ocupantes', 'Portal::ocupantes/$1');
+    $routes->post('portal/ocupacion/(:num)/ocupantes', 'Portal::addOcupante/$1');
+    $routes->post('portal/ocupacion/(:num)/ocupantes/(:num)/invitar', 'Portal::invitarOcupante/$1/$2');
+    $routes->post('portal/ocupacion/(:num)/ocupantes/(:num)/eliminar', 'Portal::removeOcupante/$1/$2');
 
     // Switch active condominio (tenant context) — any logged-in user, validated by service.
     $routes->post('condominio/activo', 'Condominios::setActivo');

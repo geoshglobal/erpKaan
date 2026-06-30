@@ -57,7 +57,7 @@ class OcupanteModel extends Model
      */
     public function casasForPersona(int $personaId): array
     {
-        return $this->select('casas.id AS casa_id, casas.identificador, ocupantes.rol, ocupaciones.tipo_uso')
+        return $this->select('ocupaciones.id AS ocupacion_id, casas.id AS casa_id, casas.identificador, ocupantes.rol, ocupaciones.tipo_uso')
             ->join('ocupaciones', 'ocupaciones.id = ocupantes.ocupacion_id')
             ->join('casas', 'casas.id = ocupaciones.casa_id')
             ->where('ocupantes.persona_id', $personaId)

@@ -10,6 +10,9 @@ $usos = ['propio' => 'Uso propio', 'renta_lineal' => 'Renta lineal', 'renta_vaca
 
 <div class="page-head">
     <h1>Mi portal</h1>
+    <?php if ($persona !== null): ?>
+        <a class="btn secondary" href="<?= site_url('portal/perfil') ?>">Editar mi perfil</a>
+    <?php endif; ?>
 </div>
 
 <?php if (session('success')): ?><div class="alert success"><?= esc(session('success')) ?></div><?php endif; ?>
@@ -32,8 +35,12 @@ $usos = ['propio' => 'Uso propio', 'renta_lineal' => 'Renta lineal', 'renta_vaca
             <?php else: ?>
                 <ul style="margin:0; padding-left:1.1rem;">
                     <?php foreach ($ocupaciones as $o): ?>
-                        <li><strong><?= esc($o['identificador']) ?></strong>
-                            <span class="muted">— <?= esc($usos[$o['tipo_uso']] ?? $o['tipo_uso']) ?>, <?= esc($o['rol']) ?></span></li>
+                        <li style="margin-bottom:.35rem;"><strong><?= esc($o['identificador']) ?></strong>
+                            <span class="muted">— <?= esc($usos[$o['tipo_uso']] ?? $o['tipo_uso']) ?>, <?= esc($o['rol']) ?></span>
+                            <?php if ($o['rol'] === 'principal'): ?>
+                                · <a href="<?= site_url('portal/ocupacion/' . $o['ocupacion_id'] . '/ocupantes') ?>" style="font-size:.85rem;">Gestionar ocupantes</a>
+                            <?php endif; ?>
+                        </li>
                     <?php endforeach; ?>
                 </ul>
             <?php endif; ?>
