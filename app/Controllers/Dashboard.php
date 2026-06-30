@@ -16,7 +16,7 @@ class Dashboard extends BaseController
             ['perm' => 'personas.manage',     'title' => 'Personas',       'desc' => 'Dueños e inquilinos',                        'url' => site_url('personas')],
             ['perm' => 'ocupaciones.manage',  'title' => 'Ocupaciones',    'desc' => 'Uso propio / renta lineal / vacacional',     'url' => '#'],
             ['perm' => 'accesos.supervisar',  'title' => 'Accesos',        'desc' => 'Supervisión de visitas, paquetería y delivery', 'url' => site_url('accesos')],
-            ['perm' => 'caseta.operate',      'title' => 'Caseta',         'desc' => 'Operación de control de acceso',             'url' => '#'],
+            ['perm' => 'caseta.operate',      'title' => 'Caseta',         'desc' => 'Escanear QR y registrar entradas/salidas',   'url' => site_url('caseta/escaner')],
             ['perm' => 'finanzas.manage',     'title' => 'Finanzas',       'desc' => 'Cuotas, multas y pagos',                     'url' => '#'],
             ['perm' => 'amenidades.manage',   'title' => 'Amenidades',     'desc' => 'Reserva de áreas comunes',                   'url' => '#'],
             ['perm' => 'comunicacion.manage', 'title' => 'Comunicación',   'desc' => 'Avisos y tickets',                           'url' => '#'],
