@@ -48,6 +48,17 @@ $routes->group('', ['filter' => 'session'], static function (RouteCollection $ro
         $routes->post('(:num)/propietarios', 'Propietarios::store/$1');
         $routes->post('(:num)/propietarios/(:num)/principal', 'Propietarios::principal/$1/$2');
         $routes->post('(:num)/propietarios/(:num)/eliminar', 'Propietarios::destroy/$1/$2');
+
+        // Occupancy of a casa (ocupaciones + ocupantes).
+        $routes->get('(:num)/ocupaciones', 'Ocupaciones::index/$1');
+        $routes->get('(:num)/ocupaciones/nueva', 'Ocupaciones::new/$1');
+        $routes->post('(:num)/ocupaciones', 'Ocupaciones::create/$1');
+        $routes->get('(:num)/ocupaciones/(:num)/editar', 'Ocupaciones::edit/$1/$2');
+        $routes->post('(:num)/ocupaciones/(:num)', 'Ocupaciones::update/$1/$2');
+        $routes->post('(:num)/ocupaciones/(:num)/eliminar', 'Ocupaciones::delete/$1/$2');
+        $routes->post('(:num)/ocupaciones/(:num)/ocupantes', 'Ocupaciones::addOcupante/$1/$2');
+        $routes->post('(:num)/ocupaciones/(:num)/ocupantes/(:num)/principal', 'Ocupaciones::principalOcupante/$1/$2/$3');
+        $routes->post('(:num)/ocupaciones/(:num)/ocupantes/(:num)/eliminar', 'Ocupaciones::removeOcupante/$1/$2/$3');
     });
 
     $routes->group('cajones', ['filter' => 'permission:propiedades.manage'], static function (RouteCollection $routes): void {

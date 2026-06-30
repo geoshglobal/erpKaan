@@ -177,6 +177,12 @@ Production has **no `DELETE` and no DDL** (`CREATE`/`ALTER`/`DROP`). Implication
   propiedades.manage, fully tenant-scoped). Add owner (persona + %, fecha, principal),
   toggle principal (single-principal invariant via clearPrincipal), remove (soft delete),
   duplicate guard. Persona edit page shows an owned-casas summary. Verified incl. isolation.
-- **Personas roadmap (by steps):** step 1 base registry ✅ → step 2 owners↔casas ✅ →
-  step 3 occupancy (`ocupaciones` + `ocupantes`, principal/secundario, uso
-  propio/renta_lineal/renta_vacacional).
+- **Personas step 3 — occupancy done:** `OcupacionModel` + `OcupanteModel`. Managed from
+  the casa (`Casas list → Ocupación`): `Ocupaciones` controller with nested tenant-scoped
+  routes `casas/(:num)/ocupaciones[...]` and ocupantes sub-routes. Per-casa occupancy
+  history; **single-vigente invariant** (clearVigente) and marking one vigente **syncs
+  `casas.tipo_ocupacion_actual`**. Ocupantes: one principal + N secundarios (single-principal
+  invariant), parentesco, duplicate guard. Verified incl. vigente sync + isolation.
+- **Personas roadmap:** step 1 base ✅ · step 2 owners↔casas ✅ · step 3 occupancy ✅.
+  **F1 (Auth + Propiedades + Personas) complete.** Next: F2 (access control — visit QR,
+  parcels, caseta panel, notifications).
