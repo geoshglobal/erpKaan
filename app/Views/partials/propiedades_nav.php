@@ -2,8 +2,9 @@
 // $current: 'torres' | 'casas' | 'cajones'
 $current ??= '';
 $tabs = [
-    'torres' => ['Torres', site_url('torres')],
-    'casas'  => ['Casas',  site_url('casas')],
+    'torres'  => ['Torres',  site_url('torres')],
+    'casas'   => ['Casas',   site_url('casas')],
+    'cajones' => ['Cajones', site_url('cajones')],
 ];
 ?>
 <nav style="display:flex; gap:.4rem; margin-bottom:1.25rem; border-bottom:1px solid #e2e8f0; padding-bottom:.6rem;">

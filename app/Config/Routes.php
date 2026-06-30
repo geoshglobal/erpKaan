@@ -43,4 +43,13 @@ $routes->group('', ['filter' => 'session'], static function (RouteCollection $ro
         $routes->post('(:num)', 'Casas::update/$1');
         $routes->post('(:num)/eliminar', 'Casas::delete/$1');
     });
+
+    $routes->group('cajones', ['filter' => 'permission:propiedades.manage'], static function (RouteCollection $routes): void {
+        $routes->get('/', 'Cajones::index');
+        $routes->get('nuevo', 'Cajones::new');
+        $routes->post('/', 'Cajones::create');
+        $routes->get('(:num)/editar', 'Cajones::edit/$1');
+        $routes->post('(:num)', 'Cajones::update/$1');
+        $routes->post('(:num)/eliminar', 'Cajones::delete/$1');
+    });
 });

@@ -157,3 +157,10 @@ Production has **no `DELETE` and no DDL** (`CREATE`/`ALTER`/`DROP`). Implication
 - **is_unique on edit:** CI4 requires the `{id}` placeholder field to have its own
   validation rule (`'id' => 'permit_empty|is_natural_no_zero'`) AND the id passed in
   the update data. Pattern applied to `CondominioModel`/`Condominios::update`.
+- **Topbar nav:** brand links to dashboard; role-aware main menu (Inicio, Condominios,
+  Propiedades) with active-state highlight via `url_is()`.
+- **Cajones CRUD done → Propiedades (F1) complete:** `CajonModel` (+ `withCasa()`),
+  `Cajones` controller scoped + gated by `permission:propiedades.manage`, casa selector,
+  tipo (asignado/visita/comun) and techado. `partials/propiedades_nav` now has
+  Torres · Casas · Cajones. **F1 Propiedades = Torres + Casas + Cajones, all done.**
+  Next F1 area: Personas (dueños/inquilinos) + ocupaciones.
