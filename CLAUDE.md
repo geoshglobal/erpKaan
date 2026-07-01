@@ -328,7 +328,9 @@ notifications = **in-app → email → push** · visits = **immediate AND schedu
   **filter form**: by **departamento (casa)** + free-text (visitor/casa/empresa) + estado — so
   caseta can find a pass by department when NOT scanning the QR. `AccesoModel::scopeForCondominio`
   / `scopeForSolicitante` build filtered queries; `$pager->only([...])` preserves filters across
-  pages.
+  pages. **Date-range filter (default last 15 days)** on accesos, visitas, paquetes and
+  notificaciones via `BaseController::dateRange()` (tz-aware local→UTC boundaries on `created_at`,
+  `Tz::boundary`/`Tz::localDate`) + reusable `partials/date_filter`.
 - **Delivery/proveedor notifications are tipo-specific:** caseta check-in/out and cajón messages
   now say "Tu delivery/proveedor llegó/salió" (not "visita") and link non-visita accesos to
   `portal/paquetes` instead of `portal/visitas/{id}`.

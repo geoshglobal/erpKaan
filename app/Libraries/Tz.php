@@ -62,4 +62,35 @@ class Tz
     {
         return in_array($zone, \DateTimeZone::listIdentifiers(), true);
     }
+
+    /** Local date (Y-m-d) at start/end of day, converted to a UTC 'Y-m-d H:i:s'. */
+    public static function boundary(?string $localDate, bool $end = false, ?string $zone = null): ?string
+    {
+        if (! $localDate) {
+            return null;
+        }
+        try {
+            $dt = new \DateTime($localDate . ($end ? ' 23:59:59' : ' 00:00:00'), new \DateTimeZone($zone ?? self::current()));
+            $dt->setTimezone(new \DateTimeZone('UTC'));
+
+            return $dt->format('Y-m-d H:i:s');
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
+    /** Local date (Y-m-d) N days ago (0 = today) in the resolved zone. */
+    public static function localDate(int $daysAgo = 0, ?string $zone = null): string
+    {
+        try {
+            $dt = new \DateTime('now', new \DateTimeZone($zone ?? self::current()));
+            if ($daysAgo > 0) {
+                $dt->modify("-{$daysAgo} days");
+            }
+
+            return $dt->format('Y-m-d');
+        } catch (\Throwable $e) {
+            return date('Y-m-d');
+        }
+    }
 }

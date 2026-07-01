@@ -9,8 +9,10 @@
     <?php endif; ?>
 </div>
 
+<?= $this->include('partials/date_filter', ['range' => $range, 'action' => site_url('notificaciones')]) ?>
+
 <?php if ($items === []): ?>
-    <p class="muted">No tienes notificaciones.</p>
+    <p class="muted">No tienes notificaciones en este rango.</p>
 <?php else: ?>
     <div class="card" style="padding:0;">
         <?php foreach ($items as $n): ?>

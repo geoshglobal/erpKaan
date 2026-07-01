@@ -34,12 +34,15 @@ class Visitas extends BaseController
             return redirect()->to('portal')->with('error', 'Tu usuario no está vinculado a una persona en este condominio.');
         }
 
-        $visitas = $this->model->scopeForSolicitante((int) $persona['id'], ['visita'])->paginate(15);
+        $range   = $this->dateRange(15);
+        $visitas = $this->model->scopeForSolicitante((int) $persona['id'], ['visita'], $range)->paginate(15);
+        $this->model->pager->only(['desde', 'hasta']);
 
         return view('visitas/index', [
             'title'   => 'Mis visitas',
             'visitas' => $visitas,
             'pager'   => $this->model->pager,
+            'range'   => $range,
         ]);
     }
 
@@ -133,12 +136,15 @@ class Visitas extends BaseController
             return redirect()->to('portal')->with('error', 'Tu usuario no está vinculado a una persona en este condominio.');
         }
 
-        $paquetes = $this->model->scopeForSolicitante((int) $persona['id'], ['paqueteria', 'delivery', 'proveedor'])->paginate(15);
+        $range    = $this->dateRange(15);
+        $paquetes = $this->model->scopeForSolicitante((int) $persona['id'], ['paqueteria', 'delivery', 'proveedor'], $range)->paginate(15);
+        $this->model->pager->only(['desde', 'hasta']);
 
         return view('paquetes/index', [
             'title'    => 'Paquetería y entregas',
             'paquetes' => $paquetes,
             'pager'    => $this->model->pager,
+            'range'    => $range,
         ]);
     }
 

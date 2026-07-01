@@ -50,4 +50,30 @@ abstract class BaseController extends Controller
     {
         return service('tenant')->activeId();
     }
+
+    /**
+     * Resolve a date-range filter from `desde`/`hasta` GET params (local Y-m-d),
+     * defaulting to the last N days. Returns the local dates (for the form) plus
+     * `fecha_desde`/`fecha_hasta` as UTC datetime boundaries (for the query).
+     *
+     * @return array{desde:string,hasta:string,fecha_desde:?string,fecha_hasta:?string}
+     */
+    protected function dateRange(int $defaultDays = 15): array
+    {
+        $desde = trim((string) $this->request->getGet('desde'));
+        $hasta = trim((string) $this->request->getGet('hasta'));
+        if ($desde === '') {
+            $desde = \App\Libraries\Tz::localDate($defaultDays);
+        }
+        if ($hasta === '') {
+            $hasta = \App\Libraries\Tz::localDate(0);
+        }
+
+        return [
+            'desde'       => $desde,
+            'hasta'       => $hasta,
+            'fecha_desde' => \App\Libraries\Tz::boundary($desde, false),
+            'fecha_hasta' => \App\Libraries\Tz::boundary($hasta, true),
+        ];
+    }
 }

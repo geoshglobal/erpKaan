@@ -12,12 +12,14 @@
     </div>
 </div>
 
+<?= $this->include('partials/date_filter', ['range' => $range, 'action' => site_url('portal/paquetes')]) ?>
+
 <?php
 $pill = ['en_caseta' => 'on', 'entregado' => 'off', 'ingresado' => 'on', 'finalizado' => 'off', 'cancelado' => 'off'];
 ?>
 
 <?php if ($paquetes === []): ?>
-    <p class="muted">No tienes paquetería ni entregas registradas.</p>
+    <p class="muted">No tienes paquetería ni entregas en este rango.</p>
 <?php else: ?>
     <div class="cards-list">
         <?php foreach ($paquetes as $p): ?>

@@ -19,7 +19,8 @@ $pillClass = ['programado' => 'on', 'ingresado' => 'on', 'en_caseta' => 'on', 'e
 $tipos = AccesoModel::TIPOS;
 // Preserve other filters when switching the tipo tab.
 $tabQuery = static function (string $tipo) use ($filters): string {
-    $q = array_filter(['casa_id' => $filters['casa_id'], 'q' => $filters['q'], 'estado' => $filters['estado'], 'tipo' => $tipo]);
+    $q = array_filter(['casa_id' => $filters['casa_id'], 'q' => $filters['q'], 'estado' => $filters['estado'],
+        'desde' => $filters['desde'], 'hasta' => $filters['hasta'], 'tipo' => $tipo]);
     return $q === [] ? '' : '?' . http_build_query($q);
 };
 ?>
@@ -42,15 +43,22 @@ $tabQuery = static function (string $tipo) use ($filters): string {
             <?php endforeach; ?>
         </select>
     </div>
-    <div class="field" style="flex:1; min-width:180px;">
+    <div class="field">
+        <label>Desde</label>
+        <input type="date" name="desde" value="<?= esc($filters['desde'], 'attr') ?>">
+    </div>
+    <div class="field">
+        <label>Hasta</label>
+        <input type="date" name="hasta" value="<?= esc($filters['hasta'], 'attr') ?>">
+    </div>
+    <div class="field" style="flex:1; min-width:160px;">
         <label>Buscar (visitante, casa, empresa)</label>
         <input type="text" name="q" value="<?= esc($filters['q'], 'attr') ?>" placeholder="Ej. Juan, A-101, Amazon">
     </div>
-    <button type="submit" class="btn">Buscar</button>
-    <?php if ($filters['casa_id'] || $filters['q'] || $filters['estado']): ?>
-        <a class="btn secondary" href="<?= site_url('accesos') . ($filters['tipo'] !== '' ? '?tipo=' . esc($filters['tipo'], 'url') : '') ?>">Limpiar</a>
-    <?php endif; ?>
+    <button type="submit" class="btn">Filtrar</button>
+    <a class="btn secondary" href="<?= site_url('accesos') . ($filters['tipo'] !== '' ? '?tipo=' . esc($filters['tipo'], 'url') : '') ?>">Limpiar</a>
 </form>
+<p class="muted" style="font-size:.8rem; margin:-.5rem 0 1rem;">Mostrando <strong><?= esc($filters['desde']) ?></strong> a <strong><?= esc($filters['hasta']) ?></strong> (por defecto, últimos 15 días).</p>
 
 <?php if ($accesos === []): ?>
     <p class="muted">No hay accesos que coincidan con el filtro.</p>

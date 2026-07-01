@@ -10,15 +10,25 @@ class Notificaciones extends BaseController
     public function index(): string
     {
         $uid   = (int) auth()->id();
+        $range = $this->dateRange(15);
         $model = new NotificacionModel();
-        $items = $model->where('user_id', $uid)->orderBy('id', 'DESC')->paginate(20);
+        $model->where('user_id', $uid);
+        if ($range['fecha_desde']) {
+            $model->where('created_at >=', $range['fecha_desde']);
+        }
+        if ($range['fecha_hasta']) {
+            $model->where('created_at <=', $range['fecha_hasta']);
+        }
+        $items = $model->orderBy('id', 'DESC')->paginate(20);
         $pager = $model->pager;
+        $pager->only(['desde', 'hasta']);
         $model->markAllRead($uid); // viewing clears the unread badge
 
         return view('notificaciones/index', [
             'title' => 'Notificaciones',
             'items' => $items,
             'pager' => $pager,
+            'range' => $range,
         ]);
     }
 

@@ -84,6 +84,12 @@ class AccesoModel extends Model
         if (! empty($filters['estado'])) {
             $this->where('accesos.estado', $filters['estado']);
         }
+        if (! empty($filters['fecha_desde'])) {
+            $this->where('accesos.created_at >=', $filters['fecha_desde']);
+        }
+        if (! empty($filters['fecha_hasta'])) {
+            $this->where('accesos.created_at <=', $filters['fecha_hasta']);
+        }
         if (! empty($filters['q'])) {
             $q = trim((string) $filters['q']);
             $this->groupStart()
@@ -107,14 +113,24 @@ class AccesoModel extends Model
         return $this->scopeForSolicitante($personaId, $tipos)->findAll();
     }
 
-    /** Query for a solicitante (returns $this to chain ->paginate($n)). @param list<string>|null $tipos */
-    public function scopeForSolicitante(int $personaId, ?array $tipos = null): self
+    /**
+     * Query for a solicitante (returns $this to chain ->paginate($n)).
+     * @param list<string>|null $tipos
+     * @param array{fecha_desde?:string,fecha_hasta?:string} $filters
+     */
+    public function scopeForSolicitante(int $personaId, ?array $tipos = null, array $filters = []): self
     {
         $this->select('accesos.*, casas.identificador AS casa_ident')
             ->join('casas', 'casas.id = accesos.casa_id', 'left')
             ->where('accesos.solicitante_persona_id', $personaId);
         if ($tipos !== null) {
             $this->whereIn('accesos.tipo', $tipos);
+        }
+        if (! empty($filters['fecha_desde'])) {
+            $this->where('accesos.created_at >=', $filters['fecha_desde']);
+        }
+        if (! empty($filters['fecha_hasta'])) {
+            $this->where('accesos.created_at <=', $filters['fecha_hasta']);
         }
 
         return $this->orderBy('accesos.id', 'DESC');
