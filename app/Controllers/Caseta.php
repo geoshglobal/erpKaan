@@ -84,13 +84,24 @@ class Caseta extends BaseController
 
         // Parking assignment for vehicles.
         $needAuth = false;
+        $forced   = false;
         if ($vehiculo) {
             $parking = new \App\Libraries\Parking();
             $cajonId = (int) $this->request->getPost('cajon_id');
+            $accion  = $this->request->getPost('cajon_accion');
             if ($cajonId && $parking->isFreeVisitorSpot((int) $this->activeCondominioId(), $cajonId)) {
                 $data['cajon_id']           = $cajonId;
                 $data['autorizacion_cajon'] = null;
-            } elseif ($this->request->getPost('usar_cajon_residente')) {
+            } elseif ($accion === 'forzar') {
+                // Caseta already got verbal authorization by phone.
+                $cajon = (new \App\Models\CajonModel())
+                    ->where('condominio_id', $this->activeCondominioId())
+                    ->where('casa_id', $acceso['casa_id'])
+                    ->where('activo', 1)->first();
+                $data['autorizacion_cajon'] = 'autorizado';
+                $data['cajon_id']           = $cajon['id'] ?? null;
+                $forced                     = true;
+            } elseif ($accion === 'solicitar') {
                 $data['autorizacion_cajon'] = 'pendiente';
                 $needAuth                   = true;
             }
@@ -100,7 +111,9 @@ class Caseta extends BaseController
 
         $nota = 'Entrada. Pax: ' . $data['pax_ingresaron']
             . ($vehiculo ? ', vehículo' . ($data['folio_corbatin'] ? ' folio ' . $data['folio_corbatin'] : '') : '')
-            . ($sinId ? ', sin ID' : '');
+            . ($sinId ? ', sin ID' : '')
+            . ($forced ? ', cajón del residente autorizado por teléfono' : '')
+            . ($needAuth ? ', autorización de cajón solicitada' : '');
         (new AccesoEventoModel())->log($id, 'ingresado', $acceso['estado'], auth()->id(), $nota);
 
         Notify::acceso(
@@ -116,11 +129,17 @@ class Caseta extends BaseController
                 'No hay cajones de visita disponibles para ' . $acceso['nombre_visitante']
                 . '. Autoriza o rechaza el uso de tu cajón en “Mi portal → Autorizaciones”.'
             );
+        } elseif ($forced) {
+            Notify::acceso(
+                $acceso,
+                'Se usó tu cajón',
+                'Se usó tu cajón para ' . $acceso['nombre_visitante'] . ' (autorizado por teléfono en caseta).'
+            );
         }
 
-        $msg = $needAuth
-            ? 'Entrada registrada. Se solicitó autorización del residente para el cajón. ⏳'
-            : 'Entrada registrada. ✅';
+        $msg = $needAuth ? 'Entrada registrada. Se solicitó autorización del residente para el cajón. ⏳'
+            : ($forced ? 'Entrada registrada. Cajón del residente autorizado por teléfono. ✅'
+                : 'Entrada registrada. ✅');
 
         return redirect()->to('accesos/' . $id)->with('success', $msg);
     }

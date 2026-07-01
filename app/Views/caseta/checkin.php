@@ -27,22 +27,29 @@ $reg = (int) $acceso['num_personas'];
     <span class="muted">— registrado para <?= $reg ?> persona<?= $reg === 1 ? '' : 's' ?></span>
 </div>
 
+<?php if ($cal || $wa): ?>
+    <div class="card" style="margin-bottom:1rem; display:flex; gap:.75rem; align-items:center; flex-wrap:wrap;">
+        <span class="muted" style="font-size:.9rem;">¿Necesitas confirmar algo con el residente?</span>
+        <?php if ($cal): ?><a class="btn small" href="<?= esc($cal) ?>">📞 Llamar</a><?php endif; ?>
+        <?php if ($wa): ?><a class="btn small" style="background:#25d366;" href="<?= esc($wa) ?>" target="_blank" rel="noopener">🟢 WhatsApp</a><?php endif; ?>
+    </div>
+<?php endif; ?>
+
 <form class="card" method="post" action="<?= site_url('caseta/accesos/' . $acceso['id'] . '/checkin') ?>" enctype="multipart/form-data">
     <?= csrf_field() ?>
 
     <fieldset>
         <legend>Ingreso</legend>
-        <div class="field" style="max-width:50%;">
+        <div class="field">
             <label>Personas que ingresan</label>
-            <input type="number" min="1" name="pax_ingresaron" id="pax" value="<?= $reg ?>" data-reg="<?= $reg ?>">
+            <div class="stepper">
+                <button type="button" id="pax-minus" aria-label="menos">−</button>
+                <input type="number" min="1" name="pax_ingresaron" id="pax" value="<?= $reg ?>" data-reg="<?= $reg ?>">
+                <button type="button" id="pax-plus" aria-label="más">+</button>
+            </div>
         </div>
         <div id="pax-alert" class="alert error" style="display:none;">
-            ⚠️ Ingresan <strong>más personas</strong> de las registradas (<?= $reg ?>). Confirma con el residente:
-            <div style="margin-top:.5rem; display:flex; gap:.5rem; flex-wrap:wrap;">
-                <?php if ($cal): ?><a class="btn small" href="<?= esc($cal) ?>">📞 Llamar</a><?php endif; ?>
-                <?php if ($wa): ?><a class="btn small" style="background:#25d366;" href="<?= esc($wa) ?>" target="_blank" rel="noopener">🟢 WhatsApp</a><?php endif; ?>
-                <?php if (! $cal && ! $wa): ?><span class="muted" style="font-size:.85rem;">El residente no tiene teléfono registrado.</span><?php endif; ?>
-            </div>
+            ⚠️ Ingresan <strong>más personas</strong> de las registradas (<?= $reg ?>). Confírmalo con el residente (botones arriba).
         </div>
 
         <div class="field">
@@ -53,7 +60,7 @@ $reg = (int) $acceso['num_personas'];
         </div>
         <div id="veh" style="display:none;">
             <?php if (empty($acceso['permite_vehiculo'])): ?>
-                <div class="alert error" style="margin-bottom:.75rem;">⚠️ El residente <strong>no autorizó</strong> acceso en vehículo. Confírmalo antes de permitir el ingreso.</div>
+                <div class="alert error" style="margin-bottom:.75rem;">⚠️ El residente <strong>no autorizó</strong> acceso en vehículo. Confírmalo antes de permitir el ingreso (botones arriba).</div>
             <?php endif; ?>
             <div class="grid2">
                 <div class="field"><label>Folio de corbatín / cono</label>
@@ -73,11 +80,15 @@ $reg = (int) $acceso['num_personas'];
                     <div class="muted" style="font-size:.78rem; margin-top:.25rem;"><?= count($cajonesLibres) ?> cajón(es) de visita disponible(s).</div>
                 <?php else: ?>
                     <div class="alert error" style="margin:0;">
-                        No hay cajones de visita disponibles.
-                        <label style="display:flex; gap:.5rem; align-items:center; font-weight:400; margin-top:.5rem;">
-                            <input type="checkbox" name="usar_cajon_residente" value="1" style="width:auto;">
-                            Usar cajón del residente (se solicitará su autorización)
-                        </label>
+                        <div style="margin-bottom:.5rem;">No hay cajones de visita disponibles. Para usar el cajón del residente:</div>
+                        <div style="display:flex; gap:.5rem; flex-wrap:wrap;">
+                            <button type="submit" name="cajon_accion" value="solicitar" class="btn secondary">Solicitar al residente</button>
+                            <button type="submit" name="cajon_accion" value="forzar" class="btn">Autorizado por teléfono</button>
+                        </div>
+                        <div class="muted" style="font-size:.78rem; margin-top:.45rem;">
+                            <strong>Solicitar</strong>: registra la entrada y deja la autorización pendiente (el residente responde en su portal).
+                            <strong>Autorizado por teléfono</strong>: úsalo solo si ya llamaste y confirmó.
+                        </div>
                     </div>
                 <?php endif; ?>
             </div>
@@ -130,6 +141,12 @@ $reg = (int) $acceso['num_personas'];
         document.getElementById('pax-alert').style.display = (parseInt(pax.value || '0', 10) > reg) ? 'block' : 'none';
     }
     pax.addEventListener('input', checkPax); checkPax();
+    document.getElementById('pax-minus').addEventListener('click', function () {
+        pax.value = Math.max(1, (parseInt(pax.value || '1', 10) - 1)); checkPax();
+    });
+    document.getElementById('pax-plus').addEventListener('click', function () {
+        pax.value = (parseInt(pax.value || '0', 10) + 1); checkPax();
+    });
 
     document.getElementById('veh-check').addEventListener('change', function () {
         document.getElementById('veh').style.display = this.checked ? 'block' : 'none';

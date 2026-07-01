@@ -53,8 +53,13 @@
         form.card { background:#fff; border:1px solid var(--line); border-radius:12px; padding:1.25rem; }
         .field { margin-bottom:1rem; }
         .field label { display:block; font-size:.82rem; font-weight:600; margin-bottom:.3rem; color:#334155; }
-        .field input[type=text], .field input[type=email], .field select {
+        .field input[type=text], .field input[type=email], .field input[type=number], .field input[type=password], .field input[type=date], .field input[type=datetime-local], .field select {
             width:100%; padding:.5rem .6rem; border:1px solid #cbd5e1; border-radius:8px; font-size:.9rem; }
+        .stepper { display:inline-flex; align-items:stretch; border:1px solid #cbd5e1; border-radius:8px; overflow:hidden; background:#fff; }
+        .stepper button { border:none; background:#f1f5f9; color:#0f172a; width:40px; font-size:1.2rem; line-height:1; cursor:pointer; }
+        .stepper button:hover { background:#e2e8f0; }
+        .stepper input { border:none; width:64px; text-align:center; font-size:1rem; padding:.5rem 0; -moz-appearance:textfield; appearance:textfield; }
+        .stepper input::-webkit-outer-spin-button, .stepper input::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; }
         .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
         .form-actions { display:flex; gap:.6rem; margin-top:1rem; }
         fieldset { border:1px solid var(--line); border-radius:10px; padding:1rem; margin:0 0 1.25rem; }
