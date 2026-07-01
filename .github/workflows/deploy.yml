@@ -38,6 +38,8 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           protocol: ftps
+          port: 21
+          timeout: 120000
           server-dir: ./
           # Skip secrets and dev-only files. The writable/ and public/uploads/
           # directory STRUCTURE (index.html/.gitkeep placeholders) IS uploaded so the
