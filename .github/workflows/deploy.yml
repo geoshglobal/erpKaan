@@ -39,15 +39,16 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           protocol: ftps
           server-dir: ./
-          # Keep server-side runtime data and secrets untouched; skip dev-only files.
+          # Skip secrets and dev-only files. The writable/ and public/uploads/
+          # directory STRUCTURE (index.html/.gitkeep placeholders) IS uploaded so the
+          # app boots and photo uploads work; the FTP action never deletes files, so
+          # server-side logs/sessions/uploaded photos are preserved across deploys.
           exclude: |
             **/.git*
             **/.git*/**
             .github/**
             tests/**
             node_modules/**
-            writable/**
-            public/uploads/**
             **/.env
             **/.env.*
             *.md
