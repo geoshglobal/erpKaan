@@ -43,8 +43,8 @@ $tipos = AccesoModel::TIPOS;
                     <td class="muted"><?= esc($a['casa_ident'] ?? '') ?></td>
                     <td class="muted"><?= esc($a['solicitante'] ?: '—') ?></td>
                     <td class="muted" style="font-size:.85rem;">
-                        <?= $a['valido_desde'] ? esc(date('d/m H:i', strtotime($a['valido_desde']))) : '—' ?>
-                        <?= $a['valido_hasta'] ? ' → ' . esc(date('d/m H:i', strtotime($a['valido_hasta']))) : '' ?>
+                        <?= $a['valido_desde'] ? esc(dt($a['valido_desde'], 'd/m H:i')) : '—' ?>
+                        <?= $a['valido_hasta'] ? ' → ' . esc(dt($a['valido_hasta'], 'd/m H:i')) : '' ?>
                     </td>
                     <td><span class="pill <?= $pillClass[$estado] ?? 'off' ?>"><?= esc(AccesoModel::ESTADOS[$estado] ?? $estado) ?></span></td>
                     <td style="text-align:right;">

@@ -38,6 +38,9 @@ $routes->group('', ['filter' => 'session'], static function (RouteCollection $ro
     $routes->post('portal/visitas/(:num)/cancelar', 'Visitas::cancelar/$1');
     // Packages / deliveries addressed to the resident (caseta-registered).
     $routes->get('portal/paquetes', 'Visitas::paquetes');
+    // Resident announces an expected delivery/proveedor to caseta.
+    $routes->get('portal/avisos/nuevo', 'Visitas::avisar');
+    $routes->post('portal/avisos', 'Visitas::crearAviso');
     // Principal manages occupants of their own casa.
     $routes->get('portal/ocupacion/(:num)/ocupantes', 'Portal::ocupantes/$1');
     $routes->post('portal/ocupacion/(:num)/ocupantes', 'Portal::addOcupante/$1');
@@ -58,6 +61,7 @@ $routes->group('', ['filter' => 'session'], static function (RouteCollection $ro
         $routes->get('escaner', 'Caseta::escaner');
         $routes->get('registro', 'Caseta::registro');
         $routes->post('registro', 'Caseta::registrar');
+        $routes->get('accesos/(:num)/entregar', 'Caseta::entregarForm/$1');
         $routes->post('accesos/(:num)/entregar', 'Caseta::entregar/$1');
         $routes->get('accesos/(:num)/checkin', 'Caseta::checkinForm/$1');
         $routes->post('accesos/(:num)/checkin', 'Caseta::checkin/$1');

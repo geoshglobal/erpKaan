@@ -67,6 +67,7 @@ $usos = ['propio' => 'Uso propio', 'renta_lineal' => 'Renta lineal', 'renta_vaca
         <a class="btn secondary" href="<?= site_url('portal/visitas/nueva') ?>">+ Nueva visita</a>
         <a class="btn secondary" href="<?= site_url('portal/autorizaciones') ?>">Autorizaciones de cajón</a>
         <a class="btn secondary" href="<?= site_url('portal/paquetes') ?>">📦 Paquetería y entregas</a>
+        <a class="btn secondary" href="<?= site_url('portal/avisos/nuevo') ?>">🛵 Avisar delivery/proveedor</a>
     </div>
 
     <p class="muted" style="margin-top:1.5rem; font-size:.85rem;">

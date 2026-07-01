@@ -6,7 +6,10 @@
 
 <div class="page-head">
     <h1>Paquetería y entregas</h1>
-    <a class="btn secondary" href="<?= site_url('portal') ?>">← Mi portal</a>
+    <div class="head-actions">
+        <a class="btn" href="<?= site_url('portal/avisos/nuevo') ?>">🛵 Avisar delivery/proveedor</a>
+        <a class="btn secondary" href="<?= site_url('portal') ?>">← Mi portal</a>
+    </div>
 </div>
 
 <?php
@@ -42,11 +45,11 @@ $pill = ['en_caseta' => 'on', 'entregado' => 'off', 'ingresado' => 'on', 'finali
                         </div>
                         <div class="muted" style="font-size:.8rem; margin-top:.15rem;">
                             <?php if ($p['tipo'] === 'paqueteria'): ?>
-                                Recibido: <?= esc(date('d/m/Y H:i', strtotime($p['created_at']))) ?>
-                                <?= ! empty($p['check_out_at']) ? ' · Entregado: ' . esc(date('d/m H:i', strtotime($p['check_out_at']))) : '' ?>
+                                Recibido: <?= esc(dt($p['created_at'], 'd/m/Y H:i')) ?>
+                                <?= ! empty($p['check_out_at']) ? ' · Entregado: ' . esc(dt($p['check_out_at'], 'd/m H:i')) : '' ?>
                             <?php else: ?>
-                                Ingreso: <?= ! empty($p['check_in_at']) ? esc(date('d/m/Y H:i', strtotime($p['check_in_at']))) : '—' ?>
-                                <?= ! empty($p['check_out_at']) ? ' · Salida: ' . esc(date('d/m H:i', strtotime($p['check_out_at']))) : '' ?>
+                                Ingreso: <?= ! empty($p['check_in_at']) ? esc(dt($p['check_in_at'], 'd/m/Y H:i')) : '—' ?>
+                                <?= ! empty($p['check_out_at']) ? ' · Salida: ' . esc(dt($p['check_out_at'], 'd/m H:i')) : '' ?>
                             <?php endif; ?>
                         </div>
                     </div>

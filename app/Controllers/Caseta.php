@@ -37,10 +37,17 @@ class Caseta extends BaseController
         $cid   = (int) $this->activeCondominioId();
         $casas = (new \App\Models\CasaModel())->where('condominio_id', $cid)->orderBy('identificador', 'ASC')->findAll();
 
+        $condo    = service('tenant')->active();
+        $horarios = [];
+        foreach (\App\Libraries\Horario::TIPOS as $t) {
+            $horarios[$t] = \App\Libraries\Horario::resumen(\App\Libraries\Horario::forTipo($condo, $t));
+        }
+
         return view('caseta/registro', [
-            'title'        => 'Registrar paquetería / entrega',
-            'casas'        => $casas,
+            'title'         => 'Registrar paquetería / entrega',
+            'casas'         => $casas,
             'destinatarios' => \App\Libraries\CasaResidents::mapForCondominio($cid),
+            'horarios'      => $horarios,
         ]);
     }
 
@@ -123,6 +130,20 @@ class Caseta extends BaseController
             $esPaqueteria ? 'Paquetería registrada. Se notificó al residente. 📦' : 'Ingreso registrado. Se notificó al residente. ✅');
     }
 
+    /** Form to hand a package over to the resident (captures a proof photo). */
+    public function entregarForm(int $id): string|RedirectResponse
+    {
+        $acceso = $this->scoped($id);
+        if ($acceso === null) {
+            return redirect()->to('accesos')->with('error', 'Acceso no encontrado.');
+        }
+        if ($acceso['tipo'] !== 'paqueteria' || $acceso['estado'] !== 'en_caseta') {
+            return redirect()->to('accesos/' . $id)->with('error', 'Solo se entrega paquetería que está en caseta.');
+        }
+
+        return view('caseta/entregar', ['title' => 'Entregar paquete', 'acceso' => $acceso]);
+    }
+
     /** Paquetería handed over to the resident. */
     public function entregar(int $id): RedirectResponse
     {
@@ -134,7 +155,15 @@ class Caseta extends BaseController
             return redirect()->to('accesos/' . $id)->with('error', 'Solo se entrega paquetería que está en caseta.');
         }
 
-        $this->model->update($id, ['estado' => 'entregado', 'check_out_at' => date('Y-m-d H:i:s')]);
+        if (! $this->validate(['foto' => 'permit_empty|is_image[foto]|max_size[foto,5120]'])) {
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        }
+
+        $data = ['estado' => 'entregado', 'check_out_at' => date('Y-m-d H:i:s')];
+        if (($path = $this->storeUpload('foto')) !== null) {
+            $data['foto_entrega_path'] = $path;
+        }
+        $this->model->update($id, $data);
         (new AccesoEventoModel())->log($id, 'entregado', 'en_caseta', auth()->id(), 'Paquete entregado al residente');
         Notify::acceso($acceso, 'Paquete entregado',
             trim(($acceso['empresa'] ? $acceso['empresa'] . ' — ' : '') . $acceso['nombre_visitante']) . ' fue entregado.',
@@ -155,11 +184,18 @@ class Caseta extends BaseController
 
         $parking = new \App\Libraries\Parking();
 
+        // Schedule alert for delivery/proveedor arriving outside the allowed window.
+        $horario = null;
+        if (in_array($acceso['tipo'], \App\Libraries\Horario::TIPOS, true)) {
+            $horario = \App\Libraries\Horario::check(service('tenant')->active(), $acceso['tipo']);
+        }
+
         return view('caseta/checkin', [
             'title'         => 'Registrar entrada',
             'acceso'        => $acceso,
             'solicitante'   => $acceso['solicitante_persona_id'] ? (new PersonaModel())->find($acceso['solicitante_persona_id']) : null,
             'cajonesLibres' => $parking->availableVisitorSpots((int) $this->activeCondominioId()),
+            'horario'       => $horario,
         ]);
     }
 

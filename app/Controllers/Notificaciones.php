@@ -19,24 +19,34 @@ class Notificaciones extends BaseController
         ]);
     }
 
-    /** Per-user channel preferences (email / push). */
+    /** Per-user channel preferences (email / push / timezone). */
     public function preferencias(): string
     {
+        $condo = service('tenant')->active();
+
         return view('notificaciones/preferencias', [
             'title'      => 'Configuración de notificaciones',
             'prefs'      => NotifPrefs::all((int) auth()->id()),
             'emailAddr'  => auth()->user()->email ?? null,
             'pushGlobal' => \App\Libraries\Push::enabled(),
             'mailGlobal' => \App\Libraries\Mailer::enabled(),
+            'zones'      => \App\Libraries\Tz::ZONES,
+            'condoTz'    => $condo['timezone'] ?? \App\Libraries\Tz::DEFAULT,
         ]);
     }
 
     public function guardarPreferencias()
     {
+        $tz = (string) $this->request->getPost('timezone');
+        if ($tz !== '' && ! \App\Libraries\Tz::valid($tz)) {
+            $tz = '';
+        }
+
         NotifPrefs::save(
             (int) auth()->id(),
             (bool) $this->request->getPost('email'),
-            (bool) $this->request->getPost('push')
+            (bool) $this->request->getPost('push'),
+            $tz
         );
 
         return redirect()->to('notificaciones/preferencias')->with('success', 'Preferencias guardadas.');

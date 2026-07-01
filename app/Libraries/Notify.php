@@ -55,6 +55,53 @@ class Notify
     }
 
     /**
+     * Notify the caseta operators of a condominio about an acceso (e.g. a resident
+     * announcing an expected delivery). In-app + push per each operator's prefs.
+     */
+    public static function caseta(array $acceso, string $titulo, string $mensaje, ?string $url = null): void
+    {
+        $userIds = self::casetaUserIds((int) $acceso['condominio_id']);
+        if ($userIds === []) {
+            return;
+        }
+
+        $model = new NotificacionModel();
+        foreach ($userIds as $uid) {
+            $model->insert([
+                'condominio_id' => $acceso['condominio_id'],
+                'persona_id'    => null,
+                'user_id'       => $uid,
+                'acceso_id'     => $acceso['id'],
+                'tipo'          => 'acceso',
+                'titulo'        => $titulo,
+                'mensaje'       => $mensaje,
+                'url'           => $url,
+                'canal'         => 'in_app',
+            ]);
+
+            if (NotifPrefs::push($uid)) {
+                Push::toUser($uid, $titulo, $mensaje, $url);
+            }
+        }
+    }
+
+    /** User ids of the caseta operators scoped to a condominio. @return list<int> */
+    private static function casetaUserIds(int $condominioId): array
+    {
+        $rows = db_connect()->table('condominio_usuarios cu')
+            ->select('cu.user_id')
+            ->join('auth_groups_users g', 'g.user_id = cu.user_id', 'inner')
+            ->where('g.group', 'caseta')
+            ->where('cu.condominio_id', $condominioId)
+            ->where('cu.activo', 1)
+            ->where('cu.deleted_at', null)
+            ->groupBy('cu.user_id')
+            ->get()->getResultArray();
+
+        return array_map(static fn ($r): int => (int) $r['user_id'], $rows);
+    }
+
+    /**
      * Resolve a stored notification URL to a single absolute URL — idempotent:
      * an already-absolute URL is returned unchanged (so legacy rows that stored
      * site_url() output don't get the base prepended twice), a relative path is

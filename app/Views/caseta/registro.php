@@ -26,6 +26,7 @@
         <div class="muted" id="tipo-hint" style="font-size:.8rem; margin-top:.35rem;">
             El paquete queda en caseta hasta que el residente lo recoja.
         </div>
+        <div class="alert" id="horario-info" style="display:none; margin-top:.5rem; background:#f0f9ff; color:#075985; border:1px solid #bae6fd; font-size:.83rem;"></div>
     </div>
 
     <div class="grid2">
@@ -65,7 +66,8 @@
 
     <div class="field">
         <label>Foto (paquete o repartidor)</label>
-        <input type="file" name="foto" accept="image/*" capture="environment">
+        <input type="file" name="foto" id="foto" accept="image/*" capture="environment">
+        <?= $this->include('partials/camera_capture', ['inputId' => 'foto']) ?>
     </div>
 
     <div class="form-actions">
@@ -80,10 +82,12 @@
 <script>
 (function () {
     var DEST = <?= json_encode($destinatarios, JSON_UNESCAPED_UNICODE) ?>;
+    var HORARIOS = <?= json_encode($horarios ?? [], JSON_UNESCAPED_UNICODE) ?>;
     var casaSel = document.getElementById('casa-select');
     var destSel = document.getElementById('dest-select');
     var hint = document.getElementById('tipo-hint');
     var lblNombre = document.getElementById('lbl-nombre');
+    var horarioInfo = document.getElementById('horario-info');
 
     function fillDest() {
         var id = casaSel.value;
@@ -106,7 +110,15 @@
             hint.textContent = 'Ingreso directo: entra ahora y se registra su salida después.';
             lblNombre.textContent = (t === 'proveedor' ? 'Proveedor / servicio' : 'Repartidor / descripción');
         }
+        // Show the allowed schedule for delivery/proveedor (informational for caseta).
+        if (HORARIOS[t]) {
+            horarioInfo.textContent = '🕒 Horario permitido de ' + t + ': ' + HORARIOS[t];
+            horarioInfo.style.display = 'block';
+        } else {
+            horarioInfo.style.display = 'none';
+        }
     });
 })();
 </script>
+<script src="<?= base_url('js/camera.js') ?>"></script>
 <?= $this->endSection() ?>

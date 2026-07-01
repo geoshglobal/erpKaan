@@ -76,9 +76,9 @@
         form.card { background:#fff; border:1px solid var(--line); border-radius:12px; padding:1.1rem; }
         .field { margin-bottom:1rem; }
         .field label { display:block; font-size:.82rem; font-weight:600; margin-bottom:.3rem; color:#334155; }
-        .field input[type=text], .field input[type=email], .field input[type=number], .field input[type=password], .field input[type=date], .field input[type=datetime-local], .field input[type=tel], .field select, .field textarea {
+        .field input[type=text], .field input[type=email], .field input[type=number], .field input[type=password], .field input[type=date], .field input[type=datetime-local], .field input[type=time], .field input[type=tel], .field select, .field textarea {
             width:100%; padding:.6rem .7rem; border:1px solid #cbd5e1; border-radius:8px; font-size:16px; }
-        input[type=text], input[type=email], input[type=number], input[type=password], input[type=tel], input[type=date], input[type=datetime-local], select, textarea { font-size:16px; }
+        input[type=text], input[type=email], input[type=number], input[type=password], input[type=tel], input[type=date], input[type=datetime-local], input[type=time], select, textarea { font-size:16px; }
         .segmented { display:flex; flex-wrap:wrap; gap:.4rem; }
         .segmented label { border:1px solid var(--line); border-radius:999px; padding:.5rem .85rem; cursor:pointer; font-size:.9rem; display:inline-flex; gap:.35rem; align-items:center; background:#fff; }
         .segmented input { position:absolute; opacity:0; width:0; height:0; }

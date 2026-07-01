@@ -35,6 +35,13 @@ $reg = (int) $acceso['num_personas'];
     </div>
 <?php endif; ?>
 
+<?php if (! empty($horario) && $horario['enforced'] && ! $horario['permitido']): ?>
+    <div class="alert error" style="border:1px solid #fca5a5;">
+        ⛔ <strong>Fuera de horario.</strong> <?= esc(AccesoModel::TIPOS[$acceso['tipo']] ?? $acceso['tipo']) ?> permitido: <?= esc($horario['resumen']) ?>.
+        Verifica con la administración antes de dar acceso.
+    </div>
+<?php endif; ?>
+
 <form class="card" method="post" action="<?= site_url('caseta/accesos/' . $acceso['id'] . '/checkin') ?>" enctype="multipart/form-data">
     <?= csrf_field() ?>
 

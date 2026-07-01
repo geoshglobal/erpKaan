@@ -298,6 +298,29 @@ notifications = **in-app → email → push** · visits = **immediate AND schedu
 - **Notification URL fix:** callers now pass RELATIVE paths to `Notify::acceso`; `Notify::absUrl()`
   (idempotent: absolute→as-is, relative→site_url) is applied once at each sink (in-app view,
   email, push). Fixes the doubled `.../https:/.../` link seen in prod.
+- **Resident announces delivery/proveedor (F2.3+):** residents pre-announce an expected
+  `delivery` or `proveedor` from `portal/avisos/nuevo` (`Visitas::avisar`/`crearAviso`, estado
+  `programado`) so caseta grants access smoothly; **caseta is notified** via `Notify::caseta()`
+  (in-app+push to condominio users in the Shield `caseta` group, resolved through
+  `condominio_usuarios`). The vehicle/parking sub-section (permite_vehiculo + autoriza_cajon_propio)
+  shows **only for proveedor**, never delivery. Appears in `portal/paquetes` and the caseta panel.
+- **Configurable access schedules per condominio (per-day):** `condominios.horarios` (JSON) holds a
+  SEPARATE window per weekday for delivery and proveedor: `{"delivery":{"activo":true,
+  "dias":{"1":{"desde":"09:00","hasta":"18:00"}, ...}}}`. `App\Libraries\Horario` (forTipo/check/
+  resumen) evaluates in the condominio's timezone. Admin sets it in the condominio form (per-day
+  rows). Residents see the allowed window when announcing and are **blocked** if the arrival time is
+  outside it (restriction); caseta sees an **alert** (not blocked) at check-in and registro.
+- **Timezone (fixes GMT-0):** datetimes stored UTC, displayed in a resolved zone —
+  user preference → active condominio (`condominios.timezone`) → app default `America/Mexico_City`.
+  `App\Libraries\Tz` + global `dt()` helper (autoloaded via BaseController `$helpers=['kaan']`),
+  applied across the access views. Condominio form sets its zone; users override in
+  `notificaciones/preferencias`. `Visitas::vigencia/parseDateTime` now tz-aware (datetime-local
+  inputs interpreted in the user's zone → UTC; "hoy" = end of day in the user's zone).
+- **Reusable camera capture:** `partials/camera_capture` + `public/js/camera.js` add a live
+  "📷 Tomar foto" button (getUserMedia → canvas → sets the file input, independent of the file
+  picker) to any caseta photo field — used in `caseta/registro` and the new deliver-photo form.
+- **Mark-delivered captures a photo:** `Caseta::entregarForm` (GET) → `caseta/entregar` view with
+  file+camera → `entregar` (POST) stores `accesos.foto_entrega_path` as proof, then notifies.
 - **Mobile-first layout:** `layouts/app.php` rebuilt mobile-first — sticky topbar collapses to a
   CSS-only hamburger (`#navtoggle` checkbox → `.mainnav`), `.bar-right` cluster (tenant selector,
   bell, user menu with email→👤 glyph on phones), inputs at 16px (no iOS zoom), 42px tap targets,
@@ -350,6 +373,18 @@ QR per guest, the event has a **single shared event QR**.
   registers arrivals, incrementing `pax_ingresados` (per guest and total). When total reaches
   `pax_limite`, **notify the resident** that the limit was reached. Reuses the accesos +
   notifications infrastructure; complements individual visits (this is a group/event access).
+
+### F2 planned — Personal de servicio por vivienda (NOT built)
+
+Requested 2026-07-01. A resident registers recurring **household service staff** (empleada,
+jardinero, niñera, etc.) tied to their casa, with a **work schedule** so caseta can grant access
+routinely. **No QR and no phone required** — many staff don't have a phone; caseta identifies them
+by **presenting an ID** (name + photo on file). Proposed data: `personal_servicio` (condominio_id,
+casa_id, persona/nombre, foto_path, tipo/rol, activo, notas) + a per-weekday schedule (reuse the
+`Horario` per-day windows shape). Caseta panel: search staff by casa/name, verify the photo/ID,
+register entry/exit (reuse the accesos check-in/out + `acceso_eventos`), with an out-of-schedule
+alert like delivery/proveedor. Resident manages their casa's staff from the portal. Complements
+individual visits and the delivery/proveedor announce flow.
 
 ### F2.4 email channel — config note
 

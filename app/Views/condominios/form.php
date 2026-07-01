@@ -137,6 +137,49 @@ $activo = (int) $val('activo', 1);
         </p>
     </fieldset>
 
+    <fieldset>
+        <legend>Zona horaria y horarios de acceso</legend>
+        <?php
+        $condoRow = is_array($condominio ?? null) ? $condominio : null;
+        $tz = old('timezone', $condoRow['timezone'] ?? \App\Libraries\Tz::DEFAULT);
+        $diasLabels = \App\Libraries\Horario::DIAS;
+        ?>
+        <div class="field">
+            <label>Zona horaria (para mostrar fechas y evaluar horarios)</label>
+            <select name="timezone">
+                <?php foreach (\App\Libraries\Tz::ZONES as $z => $lbl): ?>
+                    <option value="<?= esc($z) ?>" <?= $tz === $z ? 'selected' : '' ?>><?= esc($lbl) ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+
+        <?php $ordenDias = [1, 2, 3, 4, 5, 6, 0]; ?>
+        <?php foreach (\App\Libraries\Horario::TIPOS as $tipo): ?>
+            <?php $cfg = \App\Libraries\Horario::forTipo($condoRow, $tipo); ?>
+            <div class="card" style="background:#f8fafc; margin-bottom:.75rem;">
+                <label style="display:flex; gap:.5rem; align-items:center; font-weight:600;">
+                    <input type="checkbox" name="horario_<?= $tipo ?>_activo" value="1" <?= $cfg['activo'] ? 'checked' : '' ?> style="width:auto;">
+                    Restringir horario de <?= esc(ucfirst($tipo)) ?>
+                </label>
+                <div style="margin-top:.6rem; display:flex; flex-direction:column; gap:.4rem;">
+                    <?php foreach ($ordenDias as $d): ?>
+                        <?php $w = $cfg['dias'][$d] ?? null; ?>
+                        <div style="display:flex; gap:.5rem; align-items:center; flex-wrap:wrap;">
+                            <label style="display:inline-flex; gap:.35rem; align-items:center; min-width:64px; font-weight:400;">
+                                <input type="checkbox" name="horario_<?= $tipo ?>_dia_<?= $d ?>_activo" value="1" <?= $w ? 'checked' : '' ?> style="width:auto;">
+                                <?= $diasLabels[$d] ?>
+                            </label>
+                            <input type="time" name="horario_<?= $tipo ?>_dia_<?= $d ?>_desde" value="<?= esc($w['desde'] ?? '09:00') ?>" style="width:auto; padding:.35rem .5rem; border:1px solid #cbd5e1; border-radius:8px;">
+                            <span class="muted">a</span>
+                            <input type="time" name="horario_<?= $tipo ?>_dia_<?= $d ?>_hasta" value="<?= esc($w['hasta'] ?? '18:00') ?>" style="width:auto; padding:.35rem .5rem; border:1px solid #cbd5e1; border-radius:8px;">
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        <?php endforeach; ?>
+        <p class="muted" style="font-size:.8rem; margin-bottom:0;">Marca los días permitidos y su horario (puede variar por día). Si un tipo no está restringido, se permite a cualquier hora. Los residentes verán estos horarios al avisar deliveries/proveedores.</p>
+    </fieldset>
+
     <div class="form-actions">
         <button type="submit" class="btn">Guardar</button>
         <a class="btn secondary" href="<?= site_url('condominios') ?>">Cancelar</a>

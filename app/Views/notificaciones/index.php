@@ -19,7 +19,7 @@
                style="display:block; text-decoration:none; color:inherit; padding:.9rem 1.1rem; border-bottom:1px solid #e2e8f0; <?= $n['leido_at'] === null ? 'background:#f0fdfa;' : '' ?>">
                 <div style="display:flex; justify-content:space-between; gap:1rem;">
                     <strong><?= esc($n['titulo']) ?><?= ! empty($n['url']) ? ' <span class="muted" style="font-weight:400;">›</span>' : '' ?></strong>
-                    <span class="muted" style="font-size:.78rem; white-space:nowrap;"><?= esc(date('d/m/Y H:i', strtotime($n['created_at']))) ?></span>
+                    <span class="muted" style="font-size:.78rem; white-space:nowrap;"><?= esc(dt($n['created_at'], 'd/m/Y H:i')) ?></span>
                 </div>
                 <?php if ($n['mensaje']): ?><div class="muted" style="font-size:.9rem; margin-top:.2rem;"><?= esc($n['mensaje']) ?></div><?php endif; ?>
             </<?= $tag ?>>
