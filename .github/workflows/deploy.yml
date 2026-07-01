@@ -1,0 +1,55 @@
+name: Deploy (FTP)
+
+# Deploys to the server over FTPS on every push to main (and on demand).
+# Required repo secrets (Settings → Secrets and variables → Actions):
+#   FTP_SERVER    e.g. kaan.geoshglobal.com
+#   FTP_USERNAME  the FTP user
+#   FTP_PASSWORD  the FTP password
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-ftp
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: intl, mbstring, json, curl
+          coverage: none
+
+      - name: Install PHP dependencies (prod)
+        run: composer install --no-dev --optimize-autoloader --no-interaction --no-progress
+
+      - name: Deploy via FTPS
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
+          server-dir: ./
+          # Keep server-side runtime data and secrets untouched; skip dev-only files.
+          exclude: |
+            **/.git*
+            **/.git*/**
+            .github/**
+            tests/**
+            node_modules/**
+            writable/**
+            public/uploads/**
+            **/.env
+            **/.env.*
+            *.md
+            phpunit.dist.xml
+            builds
