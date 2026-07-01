@@ -420,6 +420,27 @@ register entry/exit (reuse the accesos check-in/out + `acceso_eventos`), with an
 alert like delivery/proveedor. Resident manages their casa's staff from the portal. Complements
 individual visits and the delivery/proveedor announce flow.
 
+### F2 planned — Directorio de residentes + credenciales por propiedad (NOT built)
+
+Requested 2026-07-01. So caseta can **grant pedestrian (on-foot) access to residents** without a QR:
+
+1. **Consulta de habitantes por casa (con fotos).** Caseta busca una casa y ve sus **habitantes**
+   (dueños + ocupantes vigentes) con **foto** para verificar identidad y permitir el paso peatonal.
+   Reusa `CasaResidents` + `personas.foto_path`; nueva vista/panel de caseta (solo lectura, gated por
+   `caseta.operate`), buscable por casa/torre/nombre. No requiere QR ni check-in formal (o un check-in
+   peatonal ligero opcional).
+2. **Vehículos por propiedad + número de TAG.** Registro de vehículos por casa **igual que los
+   habitantes** (la tabla `vehiculos` ya existe: condominio/casa/persona, marca, modelo, color, placa)
+   — **front-load una columna `tag`** (número de TAG/RFID del engomado para el acceso vehicular).
+   Caseta consulta placa/tag por casa; CRUD desde la casa/propiedad (o el residente en su portal).
+3. **Llaveros de acceso peatonal por propiedad.** Asignación de **llaveros/fobs** RFID peatonales por
+   casa. Nueva tabla `llaveros` (condominio_id, casa_id, persona_id nullable, codigo/uid, tipo,
+   activo, notas, soft deletes). CRUD por propiedad; caseta puede consultarlos. Complementa vehículos
+   (tag) — ambos son credenciales físicas de acceso ligadas a la propiedad.
+
+Todo tenant-scoped, soft deletes, y del lado de caseta principalmente **consulta** (verificación de
+identidad para el acceso peatonal), con el alta/gestión desde propiedades o el portal del residente.
+
 ### F2.4 email channel — config note
 
 `.env` already carries `mail.*` (outgoing `kaan.geoshglobal.com:465`, protocol smtp/SSL,
