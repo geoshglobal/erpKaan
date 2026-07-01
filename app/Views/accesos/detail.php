@@ -14,7 +14,7 @@ $tipos  = ['visita' => 'Visita', 'paqueteria' => 'Paquetería', 'delivery' => 'D
     <a class="btn secondary" href="<?= site_url('accesos') ?>">← Accesos</a>
 </div>
 
-<div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+<div class="grid2">
     <div class="card">
         <h2 style="margin:0 0 .6rem; font-size:1.05rem;">Detalle</h2>
         <p style="margin:.25rem 0;"><span class="muted">Tipo:</span> <?= esc($tipos[$acceso['tipo']] ?? $acceso['tipo']) ?></p>
@@ -27,7 +27,8 @@ $tipos  = ['visita' => 'Visita', 'paqueteria' => 'Paquetería', 'delivery' => 'D
         <p style="margin:.25rem 0;"><span class="muted">Vigencia:</span>
             <?= $acceso['valido_desde'] ? esc(date('d/m/Y H:i', strtotime($acceso['valido_desde']))) : '—' ?>
             <?= $acceso['valido_hasta'] ? ' → ' . esc(date('d/m/Y H:i', strtotime($acceso['valido_hasta']))) : '' ?></p>
-        <p style="margin:.5rem 0 0;"><span class="pill <?= in_array($estado, ['programado', 'ingresado'], true) ? 'on' : 'off' ?>"><?= esc(AccesoModel::ESTADOS[$estado] ?? $estado) ?></span></p>
+        <p style="margin:.5rem 0 0;"><span class="pill <?= in_array($estado, ['programado', 'ingresado', 'en_caseta'], true) ? 'on' : 'off' ?>"><?= esc(AccesoModel::ESTADOS[$estado] ?? $estado) ?></span></p>
+        <?php if (! empty($acceso['foto_path']) && $acceso['tipo'] === 'paqueteria'): ?><p style="margin:.4rem 0 0;"><a href="<?= base_url(esc($acceso['foto_path'])) ?>" target="_blank"><img src="<?= base_url(esc($acceso['foto_path'])) ?>" alt="Paquete" style="max-height:80px; border-radius:8px; border:1px solid #cbd5e1;"></a></p><?php endif; ?>
         <?php if ($acceso['check_in_at']): ?><p class="muted" style="margin:.5rem 0 0; font-size:.85rem;">Entrada: <?= esc($acceso['check_in_at']) ?></p><?php endif; ?>
         <?php if ($acceso['pax_ingresaron'] !== null): ?><p class="muted" style="margin:.1rem 0 0; font-size:.85rem;">Ingresaron: <?= (int) $acceso['pax_ingresaron'] ?> persona(s)<?= (int) $acceso['pax_ingresaron'] > (int) $acceso['num_personas'] ? ' ⚠️ (más de lo registrado)' : '' ?></p><?php endif; ?>
         <?php if (! empty($acceso['ingreso_vehiculo'])): ?><p class="muted" style="margin:.1rem 0 0; font-size:.85rem;">Vehículo<?= $acceso['folio_corbatin'] ? ' · folio ' . esc($acceso['folio_corbatin']) : '' ?><?= $acceso['placas'] ? ' · placas ' . esc($acceso['placas']) : '' ?></p><?php endif; ?>

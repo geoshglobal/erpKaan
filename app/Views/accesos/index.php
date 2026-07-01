@@ -7,13 +7,16 @@
 <div class="page-head">
     <h1>Accesos del condominio</h1>
     <?php if (auth()->user()->can('caseta.operate')): ?>
-        <a class="btn" href="<?= site_url('caseta/escaner') ?>">📷 Escanear QR</a>
+        <div class="head-actions">
+            <a class="btn secondary" href="<?= site_url('caseta/registro') ?>">📦 Paquetería / entrega</a>
+            <a class="btn" href="<?= site_url('caseta/escaner') ?>">📷 Escanear QR</a>
+        </div>
     <?php endif; ?>
 </div>
 
 <?php
-$pillClass = ['programado' => 'on', 'ingresado' => 'on', 'finalizado' => 'off', 'cancelado' => 'off', 'vencido' => 'off'];
-$tipos = ['visita' => 'Visita', 'paqueteria' => 'Paquetería', 'delivery' => 'Delivery', 'proveedor' => 'Proveedor'];
+$pillClass = ['programado' => 'on', 'ingresado' => 'on', 'en_caseta' => 'on', 'entregado' => 'off', 'finalizado' => 'off', 'cancelado' => 'off', 'vencido' => 'off'];
+$tipos = AccesoModel::TIPOS;
 ?>
 
 <?php if ($accesos === []): ?>

@@ -27,6 +27,122 @@ class Caseta extends BaseController
         return view('caseta/escaner', ['title' => 'Escanear QR']);
     }
 
+    /**
+     * Direct gate registration for arrivals no resident pre-registered:
+     * paquetería (stays at the gate until picked up), delivery and proveedor
+     * (walk in and out). Notifies the casa's resident.
+     */
+    public function registro(): string
+    {
+        $cid   = (int) $this->activeCondominioId();
+        $casas = (new \App\Models\CasaModel())->where('condominio_id', $cid)->orderBy('identificador', 'ASC')->findAll();
+
+        return view('caseta/registro', [
+            'title'        => 'Registrar paquetería / entrega',
+            'casas'        => $casas,
+            'destinatarios' => \App\Libraries\CasaResidents::mapForCondominio($cid),
+        ]);
+    }
+
+    public function registrar(): RedirectResponse
+    {
+        $cid  = (int) $this->activeCondominioId();
+        $tipo = $this->request->getPost('tipo');
+        if (! in_array($tipo, ['paqueteria', 'delivery', 'proveedor'], true)) {
+            return redirect()->back()->withInput()->with('error', 'Tipo de registro inválido.');
+        }
+
+        $casaId = (int) $this->request->getPost('casa_id');
+        $casa   = (new \App\Models\CasaModel())->where('condominio_id', $cid)->find($casaId);
+        if ($casa === null) {
+            return redirect()->back()->withInput()->with('error', 'Selecciona una casa de este condominio.');
+        }
+
+        if (! $this->validate([
+            'nombre_visitante' => 'required|max_length[150]',
+            'foto'             => 'permit_empty|is_image[foto]|max_size[foto,5120]',
+        ])) {
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        }
+
+        // Recipient: caseta's pick, validated against the casa's residents; else the default.
+        $destId   = (int) $this->request->getPost('destinatario_persona_id');
+        $residents = \App\Libraries\CasaResidents::forCasa($casaId);
+        $validIds  = array_map(static fn ($r) => (int) $r['id'], $residents);
+        if ($destId <= 0 || ! in_array($destId, $validIds, true)) {
+            $destId = \App\Libraries\CasaResidents::defaultRecipient($casaId) ?? 0;
+        }
+
+        $esPaqueteria = $tipo === 'paqueteria';
+        $now          = date('Y-m-d H:i:s');
+
+        $data = [
+            'condominio_id'          => $cid,
+            'casa_id'                => $casaId,
+            'tipo'                   => $tipo,
+            'solicitante_persona_id' => $destId ?: null,
+            'creado_por_user_id'     => auth()->id(),
+            'nombre_visitante'       => $this->request->getPost('nombre_visitante'),
+            'empresa'                => $this->request->getPost('empresa') ?: null,
+            'num_personas'           => 1,
+            'notas'                  => $this->request->getPost('notas') ?: null,
+            'estado'                 => $esPaqueteria ? 'en_caseta' : 'ingresado',
+            'caseta_user_id'         => auth()->id(),
+        ];
+        if (! $esPaqueteria) {
+            $data['check_in_at'] = $now;
+        }
+        if (($path = $this->storeUpload('foto')) !== null) {
+            $data['foto_path'] = $path;
+        }
+
+        if (! $this->model->save($data)) {
+            return redirect()->back()->withInput()->with('errors', $this->model->errors());
+        }
+        $id = $this->model->getInsertID();
+
+        (new AccesoEventoModel())->log(
+            $id,
+            $data['estado'],
+            null,
+            auth()->id(),
+            $esPaqueteria ? 'Paquetería recibida en caseta' : ucfirst($tipo) . ' ingresó (registro directo)'
+        );
+
+        $acceso = $this->model->find($id);
+        if ($esPaqueteria) {
+            Notify::acceso($acceso, 'Tienes un paquete en caseta',
+                trim(($data['empresa'] ? $data['empresa'] . ' — ' : '') . $data['nombre_visitante']) . '. Recógelo en caseta.',
+                'portal/paquetes');
+        } else {
+            Notify::acceso($acceso, 'Llegó tu ' . AccesoModel::TIPOS[$tipo],
+                $data['nombre_visitante'] . ' ingresó al condominio.', 'portal/paquetes');
+        }
+
+        return redirect()->to('accesos/' . $id)->with('success',
+            $esPaqueteria ? 'Paquetería registrada. Se notificó al residente. 📦' : 'Ingreso registrado. Se notificó al residente. ✅');
+    }
+
+    /** Paquetería handed over to the resident. */
+    public function entregar(int $id): RedirectResponse
+    {
+        $acceso = $this->scoped($id);
+        if ($acceso === null) {
+            return redirect()->to('accesos')->with('error', 'Acceso no encontrado.');
+        }
+        if ($acceso['tipo'] !== 'paqueteria' || $acceso['estado'] !== 'en_caseta') {
+            return redirect()->to('accesos/' . $id)->with('error', 'Solo se entrega paquetería que está en caseta.');
+        }
+
+        $this->model->update($id, ['estado' => 'entregado', 'check_out_at' => date('Y-m-d H:i:s')]);
+        (new AccesoEventoModel())->log($id, 'entregado', 'en_caseta', auth()->id(), 'Paquete entregado al residente');
+        Notify::acceso($acceso, 'Paquete entregado',
+            trim(($acceso['empresa'] ? $acceso['empresa'] . ' — ' : '') . $acceso['nombre_visitante']) . ' fue entregado.',
+            'portal/paquetes');
+
+        return redirect()->to('accesos/' . $id)->with('success', 'Paquete marcado como entregado. 📬');
+    }
+
     public function checkinForm(int $id): string|RedirectResponse
     {
         $acceso = $this->scoped($id);
@@ -82,15 +198,21 @@ class Caseta extends BaseController
             $data['id_foto_path'] = $path;
         }
 
-        // Parking for vehicles. Resident-spot authorization is resolved BEFORE
-        // check-in (solicitarCajon/forzarCajon or the resident's approval); here we
-        // only assign a free visitor spot if one was picked.
+        // Parking for vehicles. A free visitor spot is assigned if picked; else,
+        // if the resident pre-authorized their own spot (autoriza_cajon_propio) and
+        // no visitor spot is free, we use the resident's spot without asking again.
         if ($vehiculo) {
             $parking = new \App\Libraries\Parking();
+            $cid     = (int) $this->activeCondominioId();
             $cajonId = (int) $this->request->getPost('cajon_id');
-            if ($cajonId && $parking->isFreeVisitorSpot((int) $this->activeCondominioId(), $cajonId)) {
+            if ($cajonId && $parking->isFreeVisitorSpot($cid, $cajonId)) {
                 $data['cajon_id']           = $cajonId;
                 $data['autorizacion_cajon'] = null;
+            } elseif ($acceso['autorizacion_cajon'] !== 'autorizado'
+                && ! empty($acceso['autoriza_cajon_propio'])
+                && $parking->availableVisitorSpots($cid) === []) {
+                $data['cajon_id']           = $this->residentCajonId((int) $acceso['casa_id']);
+                $data['autorizacion_cajon'] = 'autorizado';
             }
         }
 
@@ -106,7 +228,7 @@ class Caseta extends BaseController
             $acceso,
             'Tu visita llegó',
             $acceso['nombre_visitante'] . ' ingresó al condominio' . ($vehiculo ? ' en vehículo' : '') . '.',
-            site_url('portal/visitas/' . $id)
+            'portal/visitas/' . $id
         );
 
         return redirect()->to('accesos/' . $id)->with('success', 'Entrada registrada. ✅');
@@ -126,7 +248,7 @@ class Caseta extends BaseController
             'Autoriza el uso de tu cajón',
             'No hay cajones de visita disponibles para ' . $acceso['nombre_visitante']
             . '. Autoriza o rechaza el uso de tu cajón.',
-            site_url('portal/autorizaciones')
+            'portal/autorizaciones'
         );
 
         return redirect()->to('caseta/accesos/' . $id . '/checkin')
@@ -141,16 +263,12 @@ class Caseta extends BaseController
             return redirect()->to('accesos')->with('error', 'Acceso no encontrado.');
         }
 
-        $cajon = (new \App\Models\CajonModel())
-            ->where('condominio_id', $this->activeCondominioId())
-            ->where('casa_id', $acceso['casa_id'])
-            ->where('activo', 1)->first();
-        $this->model->update($id, ['autorizacion_cajon' => 'autorizado', 'cajon_id' => $cajon['id'] ?? null]);
+        $this->model->update($id, ['autorizacion_cajon' => 'autorizado', 'cajon_id' => $this->residentCajonId((int) $acceso['casa_id'])]);
         Notify::acceso(
             $acceso,
             'Se usó tu cajón',
             'Se autorizó por teléfono el uso de tu cajón para ' . $acceso['nombre_visitante'] . '.',
-            site_url('portal/visitas/' . $id)
+            'portal/visitas/' . $id
         );
 
         return redirect()->to('caseta/accesos/' . $id . '/checkin')
@@ -170,14 +288,32 @@ class Caseta extends BaseController
         $this->model->update($id, ['estado' => 'finalizado', 'check_out_at' => date('Y-m-d H:i:s')]);
         (new AccesoEventoModel())->log($id, 'finalizado', 'ingresado', auth()->id(), 'Salida registrada en caseta');
 
-        Notify::acceso($acceso, 'Tu visita salió', $acceso['nombre_visitante'] . ' salió del condominio.', site_url('portal/visitas/' . $id));
+        Notify::acceso($acceso, 'Tu visita salió', $acceso['nombre_visitante'] . ' salió del condominio.', 'portal/visitas/' . $id);
 
         return redirect()->to('accesos/' . $id)->with('success', 'Salida registrada. 👋');
     }
 
     private function storeIdFoto(): ?string
     {
-        $file = $this->request->getFile('id_foto');
+        return $this->storeUpload('id_foto');
+    }
+
+    /** First active parking spot of a casa (the resident's own cajon), or null. */
+    private function residentCajonId(int $casaId): ?int
+    {
+        $cajon = (new \App\Models\CajonModel())
+            ->where('condominio_id', $this->activeCondominioId())
+            ->where('casa_id', $casaId)
+            ->where('activo', 1)
+            ->first();
+
+        return $cajon['id'] ?? null;
+    }
+
+    /** Move an uploaded image to public/uploads/accesos and return its relative path. */
+    private function storeUpload(string $field): ?string
+    {
+        $file = $this->request->getFile($field);
         if ($file === null || ! $file->isValid() || $file->hasMoved()) {
             return null;
         }

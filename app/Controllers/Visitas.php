@@ -33,7 +33,21 @@ class Visitas extends BaseController
 
         return view('visitas/index', [
             'title'   => 'Mis visitas',
-            'visitas' => $this->model->forSolicitante((int) $persona['id']),
+            'visitas' => $this->model->forSolicitante((int) $persona['id'], ['visita']),
+        ]);
+    }
+
+    /** Packages/deliveries addressed to the resident (registered by caseta). */
+    public function paquetes(): string|RedirectResponse
+    {
+        $persona = $this->ownPersona();
+        if ($persona === null) {
+            return redirect()->to('portal')->with('error', 'Tu usuario no está vinculado a una persona en este condominio.');
+        }
+
+        return view('paquetes/index', [
+            'title'    => 'Paquetería y entregas',
+            'paquetes' => $this->model->forSolicitante((int) $persona['id'], ['paqueteria', 'delivery', 'proveedor']),
         ]);
     }
 
@@ -77,6 +91,7 @@ class Visitas extends BaseController
             'num_personas'           => (int) ($this->request->getPost('num_personas') ?: 1),
             'placas'                 => $this->request->getPost('placas') ?: null,
             'permite_vehiculo'       => $this->request->getPost('permite_vehiculo') ? 1 : 0,
+            'autoriza_cajon_propio'  => $this->request->getPost('autoriza_cajon_propio') ? 1 : 0,
             'notas'                  => $this->request->getPost('notas') ?: null,
             'qr_token'               => bin2hex(random_bytes(24)),
             'valido_desde'           => $desde,

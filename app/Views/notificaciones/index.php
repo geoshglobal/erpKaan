@@ -15,7 +15,7 @@
     <div class="card" style="padding:0;">
         <?php foreach ($items as $n): ?>
             <?php $tag = ! empty($n['url']) ? 'a' : 'div'; ?>
-            <<?= $tag ?> <?= ! empty($n['url']) ? 'href="' . esc($n['url']) . '"' : '' ?>
+            <<?= $tag ?> <?= ! empty($n['url']) ? 'href="' . esc(\App\Libraries\Notify::absUrl($n['url'])) . '"' : '' ?>
                style="display:block; text-decoration:none; color:inherit; padding:.9rem 1.1rem; border-bottom:1px solid #e2e8f0; <?= $n['leido_at'] === null ? 'background:#f0fdfa;' : '' ?>">
                 <div style="display:flex; justify-content:space-between; gap:1rem;">
                     <strong><?= esc($n['titulo']) ?><?= ! empty($n['url']) ? ' <span class="muted" style="font-weight:400;">›</span>' : '' ?></strong>

@@ -55,6 +55,21 @@ class Notify
     }
 
     /**
+     * Resolve a stored notification URL to a single absolute URL — idempotent:
+     * an already-absolute URL is returned unchanged (so legacy rows that stored
+     * site_url() output don't get the base prepended twice), a relative path is
+     * expanded with site_url().
+     */
+    public static function absUrl(?string $url): ?string
+    {
+        if (! $url) {
+            return null;
+        }
+
+        return preg_match('#^https?://#i', $url) ? $url : site_url($url);
+    }
+
+    /**
      * Mirror a just-created notification to email (best-effort). Stamps the row
      * with the send outcome. No-op unless the channel is enabled and the
      * recipient has an email address.
@@ -65,7 +80,7 @@ class Notify
             return;
         }
 
-        $absUrl = $url ? site_url($url) : null;
+        $absUrl = self::absUrl($url);
         $html   = Mailer::layout($titulo, $mensaje, $absUrl, 'Ver en Kaan');
 
         try {

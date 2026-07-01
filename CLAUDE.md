@@ -86,11 +86,21 @@ Code never switches groups. `.env` is git-ignored — never commit credentials.
 | Environment   | Privileges                                  |
 |---------------|---------------------------------------------|
 | development   | Full / universal (CREATE, ALTER, DROP, DELETE, etc.) |
-| **production**| **Only `SELECT`, `INSERT`, `UPDATE`**       |
+| **production**| **`SELECT`, `INSERT`, `UPDATE`** on all tables + **`DELETE` on `auth_*` only** |
 
-Production has **no `DELETE` and no DDL** (`CREATE`/`ALTER`/`DROP`). Implications for all code and schema work:
+Production has **no DDL** (`CREATE`/`ALTER`/`DROP`) and **no `DELETE` on domain tables**.
 
-- **No hard deletes in prod.** Use **soft deletes** (CI4 Model `$useSoftDeletes = true`, `deleted_at` column). A soft delete is an `UPDATE`, so it works under prod privileges. Never call raw `DELETE`/`->delete()` paths that hit prod.
+> **Shield exception (granted 2026-07-01):** the prod user (`cycoasis_kaanAdmin`) has
+> `DELETE` on the Shield housekeeping tables — `auth_remember_tokens`, `auth_identities`,
+> `auth_groups_users`, `auth_permissions_users` — because the framework hard-deletes ephemeral
+> security rows (logout purges remember tokens; role/permission changes remove rows). This does
+> NOT relax the domain rule: **domain tables still never get DELETE — soft deletes only.** The
+> logout `DELETE` error (`auth_remember_tokens`) was the trigger; Shield's `Session::logout()`
+> always calls `purgeRememberTokens()`, even with remember-me off.
+
+Implications for all code and schema work:
+
+- **No hard deletes on domain tables in prod.** Use **soft deletes** (CI4 Model `$useSoftDeletes = true`, `deleted_at` column). A soft delete is an `UPDATE`, so it works under prod privileges. Never call raw `DELETE`/`->delete()` paths on domain tables in prod (Shield's own `auth_*` deletes are fine — see the exception above).
 - **Migrations cannot run in production.** `php spark migrate` needs DDL. Schema changes are authored as migrations and run in **development only**; in prod they must be applied manually by a DBA with elevated privileges (or via a separate deploy step). Don't assume `spark migrate` runs on the prod box.
 - Design every feature assuming prod can only read, add rows, and update rows. Anything that would need DELETE/DDL at runtime must be reworked.
 
@@ -269,6 +279,31 @@ notifications = **in-app → email → push** · visits = **immediate AND schedu
   `Notification.permission !== 'granted'`; explains blocked state; session-dismissible).
   Verified: prefs round-trip (save→persist), banner render, sw.js/push.js served. **F2.4 done
   (email + push + prefs).** Remaining F2: F2.3 paquetería/delivery, F2.5 guest access.
+- **F2.3 paquetería + delivery done:** caseta "Registro directo" (`caseta/registro`) for
+  arrivals no resident pre-registered — `tipo` paquetería|delivery|proveedor. Paquetería →
+  estado `en_caseta` (stays at the gate) → `Caseta::entregar` marks `entregado`; delivery/
+  proveedor → `ingresado` now (walk-in) → existing checkout → `finalizado`. New estados
+  `en_caseta`/`entregado` + `AccesoModel::TIPOS` const. Recipient resolved via
+  `App\Libraries\CasaResidents` (owners + vigente occupants, principal first; caseta picks from
+  a per-casa JSON map, else default). Notifies the resident (in-app+email+push). Resident sees
+  them at `portal/paquetes` (`Visitas::paquetes`, tipo-filtered); `Visitas::index` now
+  visita-only. `caseta_actions` partial + accesos list/detail updated for the new estados.
+- **Parking pre-authorization (visit creation):** `accesos.autoriza_cajon_propio` (bool). On the
+  resident's new-visit form, checking "permitir vehículo" reveals "autorizo el uso de mi cajón
+  si no hay lugar de visitas". At caseta check-in, when no visitor spot is free AND the resident
+  pre-authorized, their own cajon is assigned automatically (`autorizacion_cajon='autorizado'`)
+  with no gate request — the solicitar/forzar flow only shows when NOT pre-authorized.
+  `Caseta::residentCajonId()` helper (forzarCajon refactored onto it). Check-in auto-opens the
+  vehicle section when `permite_vehiculo`.
+- **Notification URL fix:** callers now pass RELATIVE paths to `Notify::acceso`; `Notify::absUrl()`
+  (idempotent: absolute→as-is, relative→site_url) is applied once at each sink (in-app view,
+  email, push). Fixes the doubled `.../https:/.../` link seen in prod.
+- **Mobile-first layout:** `layouts/app.php` rebuilt mobile-first — sticky topbar collapses to a
+  CSS-only hamburger (`#navtoggle` checkbox → `.mainnav`), `.bar-right` cluster (tenant selector,
+  bell, user menu with email→👤 glyph on phones), inputs at 16px (no iOS zoom), 42px tap targets,
+  `.grid2` stacks, wide `table.grid` scrolls horizontally on phones, desktop enhancements behind
+  `@media (min-width:768px)`. New shared components: `.segmented`, `.head-actions`, `.cards-list`.
+  Verified: all pages 200, hamburger/nav/bar-right present, registro form + paquetes render.
 
 ### F2 backlog — visitor vehicle access + parking (DONE 2026-07-01)
 

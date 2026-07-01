@@ -17,7 +17,7 @@ class AccesoModel extends Model
     protected $allowedFields = [
         'condominio_id', 'casa_id', 'tipo', 'solicitante_persona_id', 'creado_por_user_id',
         'nombre_visitante', 'empresa', 'telefono', 'num_personas', 'pax_ingresaron',
-        'placas', 'permite_vehiculo', 'ingreso_vehiculo', 'folio_corbatin', 'cajon_id',
+        'placas', 'permite_vehiculo', 'autoriza_cajon_propio', 'ingreso_vehiculo', 'folio_corbatin', 'cajon_id',
         'autorizacion_cajon', 'foto_path', 'id_foto_path', 'sin_id', 'id_nota',
         'qr_token', 'valido_desde', 'valido_hasta', 'estado',
         'check_in_at', 'check_out_at', 'caseta_user_id', 'notas',
@@ -37,8 +37,17 @@ class AccesoModel extends Model
         'programado' => 'Programado',
         'ingresado'  => 'Ingresó',
         'finalizado' => 'Finalizó',
+        'en_caseta'  => 'En caseta',
+        'entregado'  => 'Entregado',
         'cancelado'  => 'Cancelado',
         'vencido'    => 'Vencido',
+    ];
+
+    public const TIPOS = [
+        'visita'     => 'Visita',
+        'paqueteria' => 'Paquetería',
+        'delivery'   => 'Delivery',
+        'proveedor'  => 'Proveedor',
     ];
 
     public function byToken(string $token): ?array
@@ -58,14 +67,22 @@ class AccesoModel extends Model
             ->findAll();
     }
 
-    /** Visits requested by a persona (most recent first). @return list<array<string,mixed>> */
-    public function forSolicitante(int $personaId): array
+    /**
+     * Accesos requested for / addressed to a persona (most recent first),
+     * optionally filtered by tipo(s).
+     * @param list<string>|null $tipos
+     * @return list<array<string,mixed>>
+     */
+    public function forSolicitante(int $personaId, ?array $tipos = null): array
     {
-        return $this->select('accesos.*, casas.identificador AS casa_ident')
+        $q = $this->select('accesos.*, casas.identificador AS casa_ident')
             ->join('casas', 'casas.id = accesos.casa_id', 'left')
-            ->where('accesos.solicitante_persona_id', $personaId)
-            ->orderBy('accesos.id', 'DESC')
-            ->findAll();
+            ->where('accesos.solicitante_persona_id', $personaId);
+        if ($tipos !== null) {
+            $q->whereIn('accesos.tipo', $tipos);
+        }
+
+        return $q->orderBy('accesos.id', 'DESC')->findAll();
     }
 
     /**
