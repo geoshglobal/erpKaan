@@ -245,6 +245,30 @@ notifications = **in-app → email → push** · visits = **immediate AND schedu
   "Tu visita llegó", check-out "Tu visita salió". Topbar: user email is a `<details>`
   dropdown containing Cerrar sesión. Email/push channels still pending. **F2 core = F2.0–F2.2
   + F2.4 done.** Remaining: F2.3 paquetería/delivery, F2.4 email/push, F2.5 guest access.
+- **F2.4 email channel done (code):** `App\Libraries\Mailer` (SMTP from `mail.*` env; port
+  465 → SSL crypto; `send()`, `layout()` HTML shell) gated by `notify.email` env flag (off in
+  dev so tests never hit SMTP). `Notify::acceso` now mirrors each in-app notification to the
+  solicitante's `personas.email` (best-effort; stamps `notificaciones.email_enviado_at` /
+  `email_error`). Migration `AddEmailTrackingToNotificaciones` (front-loaded tracking cols).
+  `php spark mail:test <correo>` smoke-tests SMTP. `.env`: added `mail.fromEmail`/`mail.fromName`
+  + `notify.email=false`. Migration applied to the shared DB; `mail:test` verified end-to-end
+  (SMTP OK). Flip `notify.email=true` on prod to enable. **F2.4 email done.**
+- **F2.4 push (PWA) done (code):** `minishlink/web-push` (VAPID). Keys in `.env`
+  (`push.publicKey/privateKey/subject`, `notify.push=false` gate). `push_subscriptions` table
+  (soft deletes; `endpoint_hash` sha256 unique) + `PushSubscriptionModel` (upsert/revive by
+  hash, `removeByEndpoint` on 410). `App\Libraries\Push::toUser()` sends to all of a user's
+  subs, drops expired ones. `PushController` (subscribe/unsubscribe JSON endpoints, session).
+  Client: `public/sw.js` (push + notificationclick → focus/navigate), `public/js/push.js`
+  (SW register + subscribe toggle, `#push-toggle`). `Notify::acceso` now fires in-app + email
+  + push. **Needs HTTPS on prod (localhost OK) + `notify.push=true`.**
+- **Per-user notification prefs done:** `Config\Notificaciones` (defaults email+push on) +
+  `App\Libraries\NotifPrefs` (per-user via CodeIgniter Settings context `user:{id}`). A channel
+  fires only when global env flag ON **and** user hasn't opted out. Settings page
+  `notificaciones/preferencias` (email/push checkboxes + browser push permission toggle),
+  linked from the user dropdown. Global **push-permission banner** in the layout (shows when
+  `Notification.permission !== 'granted'`; explains blocked state; session-dismissible).
+  Verified: prefs round-trip (save→persist), banner render, sw.js/push.js served. **F2.4 done
+  (email + push + prefs).** Remaining F2: F2.3 paquetería/delivery, F2.5 guest access.
 
 ### F2 backlog — visitor vehicle access + parking (DONE 2026-07-01)
 

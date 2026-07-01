@@ -4,6 +4,9 @@
 
 <div class="page-head">
     <h1>Notificaciones</h1>
+    <?php if (env('push.publicKey')): ?>
+        <button type="button" class="btn secondary small" id="push-toggle">🔔 Activar notificaciones push</button>
+    <?php endif; ?>
 </div>
 
 <?php if ($items === []): ?>
@@ -25,3 +28,13 @@
 <?php endif; ?>
 
 <?= $this->endSection() ?>
+
+<?php if (env('push.publicKey')): ?>
+<?= $this->section('scripts') ?>
+<script>
+    window.KAAN_VAPID = <?= json_encode(env('push.publicKey')) ?>;
+    window.KAAN_BASE  = <?= json_encode(base_url()) ?>;
+</script>
+<script src="<?= base_url('js/push.js') ?>"></script>
+<?= $this->endSection() ?>
+<?php endif; ?>

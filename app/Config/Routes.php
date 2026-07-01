@@ -20,6 +20,12 @@ $routes->group('', ['filter' => 'session'], static function (RouteCollection $ro
     $routes->get('dashboard', 'Dashboard::index');
     $routes->get('portal', 'Portal::index');
     $routes->get('notificaciones', 'Notificaciones::index');
+    $routes->get('notificaciones/preferencias', 'Notificaciones::preferencias');
+    $routes->post('notificaciones/preferencias', 'Notificaciones::guardarPreferencias');
+
+    // Web Push (PWA) subscription for the logged-in browser.
+    $routes->post('push/subscribe', 'PushController::subscribe');
+    $routes->post('push/unsubscribe', 'PushController::unsubscribe');
     $routes->get('portal/perfil', 'Portal::perfil');
     $routes->post('portal/perfil', 'Portal::updatePerfil');
     $routes->get('portal/autorizaciones', 'Portal::autorizaciones');

@@ -66,6 +66,10 @@
         legend { font-size:.8rem; font-weight:700; color:#0f766e; padding:0 .4rem; }
         .tenant-select { display:flex; align-items:center; gap:.4rem; }
         .tenant-select select { background:#1e293b; color:#fff; border:1px solid #334155; border-radius:8px; padding:.3rem .5rem; font-size:.85rem; }
+        .notif-banner { display:none; align-items:center; gap:.75rem; background:#fffbeb; border:1px solid #fde68a; color:#92400e; border-radius:10px; padding:.7rem 1rem; margin-bottom:1rem; font-size:.88rem; }
+        .notif-banner .nb-actions { margin-left:auto; display:flex; gap:.5rem; align-items:center; white-space:nowrap; }
+        .notif-banner a.nb-cta { background:#0d9488; color:#fff; text-decoration:none; padding:.35rem .7rem; border-radius:8px; font-weight:600; }
+        .notif-banner button.nb-close { background:none; border:none; color:#92400e; cursor:pointer; font-size:1.1rem; line-height:1; }
     </style>
     <?= $this->renderSection('head') ?>
 </head>
@@ -125,6 +129,7 @@
                 <details class="user-menu">
                     <summary><?= esc(auth()->user()->email ?? auth()->user()->username) ?> <span style="font-size:.7rem;">▾</span></summary>
                     <div class="menu">
+                        <a href="<?= site_url('notificaciones/preferencias') ?>">Configuración de notificaciones</a>
                         <a href="<?= site_url('logout') ?>">Cerrar sesión</a>
                     </div>
                 </details>
@@ -132,6 +137,17 @@
         <?php endif; ?>
     </header>
     <main>
+        <?php if ($isAuthed && env('push.publicKey')): ?>
+            <div class="notif-banner" id="notif-banner">
+                <span>🔔</span>
+                <span id="notif-banner-text">Activa las notificaciones para enterarte al instante cuando llegue una visita.</span>
+                <span class="nb-actions">
+                    <a class="nb-cta" id="notif-banner-cta" href="<?= site_url('notificaciones/preferencias') ?>">Activar</a>
+                    <button type="button" class="nb-close" id="notif-banner-close" title="Ocultar">✕</button>
+                </span>
+            </div>
+        <?php endif; ?>
+
         <?php foreach (['error', 'success'] as $type): ?>
             <?php if (session($type)): ?>
                 <div class="alert <?= $type ?>"><?= esc(session($type)) ?></div>
@@ -140,6 +156,38 @@
 
         <?= $this->renderSection('content') ?>
     </main>
+
+    <?php if ($isAuthed && env('push.publicKey')): ?>
+    <script>
+    (function () {
+        var banner = document.getElementById('notif-banner');
+        if (! banner) { return; }
+        var txt = document.getElementById('notif-banner-text');
+        var cta = document.getElementById('notif-banner-cta');
+        var closeBtn = document.getElementById('notif-banner-close');
+        var supported = 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+
+        // User dismissed it this session? keep it hidden.
+        if (sessionStorage.getItem('kaan_notif_banner_dismissed') === '1') { return; }
+
+        if (! supported) { return; } // no browser support → nothing to nag about
+        var perm = Notification.permission;
+        if (perm === 'granted') { return; } // already on
+
+        if (perm === 'denied') {
+            txt.textContent = 'Las notificaciones están bloqueadas en este navegador. Actívalas desde la configuración del sitio (icono del candado en la barra de direcciones) para recibir avisos.';
+            cta.textContent = 'Cómo activar';
+        }
+        banner.style.display = 'flex';
+
+        closeBtn.addEventListener('click', function () {
+            banner.style.display = 'none';
+            sessionStorage.setItem('kaan_notif_banner_dismissed', '1');
+        });
+    })();
+    </script>
+    <?php endif; ?>
+
     <?= $this->renderSection('scripts') ?>
 </body>
 </html>
