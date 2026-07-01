@@ -24,10 +24,19 @@ $pill = ['en_caseta' => 'on', 'entregado' => 'off', 'ingresado' => 'on', 'finali
             <?php $estado = AccesoModel::estadoEfectivo($p); ?>
             <div class="card list-card">
                 <div style="display:flex; gap:.9rem; align-items:flex-start;">
-                    <?php if (! empty($p['foto_path'])): ?>
-                        <a href="<?= base_url(esc($p['foto_path'])) ?>" target="_blank">
-                            <img src="<?= base_url(esc($p['foto_path'])) ?>" alt="" style="width:54px; height:54px; object-fit:cover; border-radius:8px; border:1px solid #cbd5e1;">
-                        </a>
+                    <?php if (! empty($p['foto_path']) || ! empty($p['foto_entrega_path'])): ?>
+                        <div style="display:flex; gap:.35rem;">
+                            <?php if (! empty($p['foto_path'])): ?>
+                                <a href="<?= base_url(esc($p['foto_path'])) ?>" target="_blank" title="Paquete">
+                                    <img src="<?= base_url(esc($p['foto_path'])) ?>" alt="Paquete" style="width:54px; height:54px; object-fit:cover; border-radius:8px; border:1px solid #cbd5e1;">
+                                </a>
+                            <?php endif; ?>
+                            <?php if (! empty($p['foto_entrega_path'])): ?>
+                                <a href="<?= base_url(esc($p['foto_entrega_path'])) ?>" target="_blank" title="Entrega">
+                                    <img src="<?= base_url(esc($p['foto_entrega_path'])) ?>" alt="Entrega" style="width:54px; height:54px; object-fit:cover; border-radius:8px; border:1px solid #16a34a;">
+                                </a>
+                            <?php endif; ?>
+                        </div>
                     <?php else: ?>
                         <div style="width:54px; height:54px; border-radius:8px; background:#f1f5f9; display:flex; align-items:center; justify-content:center; font-size:1.4rem;">
                             <?= $p['tipo'] === 'paqueteria' ? '📦' : ($p['tipo'] === 'proveedor' ? '🔧' : '🛵') ?>

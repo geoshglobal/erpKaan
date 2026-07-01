@@ -28,7 +28,22 @@ $tipos  = ['visita' => 'Visita', 'paqueteria' => 'Paquetería', 'delivery' => 'D
             <?= $acceso['valido_desde'] ? esc(dt($acceso['valido_desde'], 'd/m/Y H:i')) : '—' ?>
             <?= $acceso['valido_hasta'] ? ' → ' . esc(dt($acceso['valido_hasta'], 'd/m/Y H:i')) : '' ?></p>
         <p style="margin:.5rem 0 0;"><span class="pill <?= in_array($estado, ['programado', 'ingresado', 'en_caseta'], true) ? 'on' : 'off' ?>"><?= esc(AccesoModel::ESTADOS[$estado] ?? $estado) ?></span></p>
-        <?php if (! empty($acceso['foto_path']) && $acceso['tipo'] === 'paqueteria'): ?><p style="margin:.4rem 0 0;"><a href="<?= base_url(esc($acceso['foto_path'])) ?>" target="_blank"><img src="<?= base_url(esc($acceso['foto_path'])) ?>" alt="Paquete" style="max-height:80px; border-radius:8px; border:1px solid #cbd5e1;"></a></p><?php endif; ?>
+        <?php if ($acceso['tipo'] === 'paqueteria' && (! empty($acceso['foto_path']) || ! empty($acceso['foto_entrega_path']))): ?>
+            <div style="display:flex; gap:.6rem; flex-wrap:wrap; margin:.5rem 0 0;">
+                <?php if (! empty($acceso['foto_path'])): ?>
+                    <figure style="margin:0; text-align:center;">
+                        <a href="<?= base_url(esc($acceso['foto_path'])) ?>" target="_blank"><img src="<?= base_url(esc($acceso['foto_path'])) ?>" alt="Paquete" style="max-height:90px; border-radius:8px; border:1px solid #cbd5e1;"></a>
+                        <figcaption class="muted" style="font-size:.75rem; margin-top:.2rem;">📦 Paquete</figcaption>
+                    </figure>
+                <?php endif; ?>
+                <?php if (! empty($acceso['foto_entrega_path'])): ?>
+                    <figure style="margin:0; text-align:center;">
+                        <a href="<?= base_url(esc($acceso['foto_entrega_path'])) ?>" target="_blank"><img src="<?= base_url(esc($acceso['foto_entrega_path'])) ?>" alt="Entrega" style="max-height:90px; border-radius:8px; border:1px solid #cbd5e1;"></a>
+                        <figcaption class="muted" style="font-size:.75rem; margin-top:.2rem;">📬 Entrega</figcaption>
+                    </figure>
+                <?php endif; ?>
+            </div>
+        <?php endif; ?>
         <?php if ($acceso['check_in_at']): ?><p class="muted" style="margin:.5rem 0 0; font-size:.85rem;">Entrada: <?= esc(dt($acceso['check_in_at'])) ?></p><?php endif; ?>
         <?php if ($acceso['pax_ingresaron'] !== null): ?><p class="muted" style="margin:.1rem 0 0; font-size:.85rem;">Ingresaron: <?= (int) $acceso['pax_ingresaron'] ?> persona(s)<?= (int) $acceso['pax_ingresaron'] > (int) $acceso['num_personas'] ? ' ⚠️ (más de lo registrado)' : '' ?></p><?php endif; ?>
         <?php if (! empty($acceso['ingreso_vehiculo'])): ?><p class="muted" style="margin:.1rem 0 0; font-size:.85rem;">Vehículo<?= $acceso['folio_corbatin'] ? ' · folio ' . esc($acceso['folio_corbatin']) : '' ?><?= $acceso['placas'] ? ' · placas ' . esc($acceso['placas']) : '' ?></p><?php endif; ?>
