@@ -19,8 +19,13 @@ class Notify
     /** Notify the requester of an acceso about an event on it. */
     public static function acceso(array $acceso, string $titulo, string $mensaje, ?string $url = null): void
     {
-        $personaId = $acceso['solicitante_persona_id'] ?? null;
-        if (! $personaId) {
+        self::toPersona((int) ($acceso['solicitante_persona_id'] ?? 0), $acceso, $titulo, $mensaje, $url);
+    }
+
+    /** Notify a specific persona about an acceso (e.g. the previous resident on a reassignment). */
+    public static function toPersona(int $personaId, array $acceso, string $titulo, string $mensaje, ?string $url = null): void
+    {
+        if ($personaId <= 0) {
             return;
         }
 

@@ -38,4 +38,21 @@ class NotificacionModel extends Model
             ->where('leido_at', null)
             ->update(['leido_at' => date('Y-m-d H:i:s')]);
     }
+
+    /**
+     * Mark the acceso notifications a persona received as corrected (an UPDATE, so
+     * it works under prod privileges — no DELETE). Used when a mis-assigned
+     * paquetería/registro is reassigned to another casa.
+     */
+    public function markCorrected(int $accesoId, int $personaId): void
+    {
+        $this->builder()
+            ->where('acceso_id', $accesoId)
+            ->where('persona_id', $personaId)
+            ->update([
+                'titulo'  => '⚠️ Corregido — no era para tu casa',
+                'mensaje' => 'Este registro fue reasignado a otra vivienda. Puedes ignorarlo.',
+                'url'     => null,
+            ]);
+    }
 }

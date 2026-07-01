@@ -130,6 +130,91 @@ class Caseta extends BaseController
             $esPaqueteria ? 'Paquetería registrada. Se notificó al residente. 📦' : 'Ingreso registrado. Se notificó al residente. ✅');
     }
 
+    /** Form to correct the casa/destinatario of a caseta-registered acceso. */
+    public function reasignarForm(int $id): string|RedirectResponse
+    {
+        $acceso = $this->scoped($id);
+        if ($acceso === null) {
+            return redirect()->to('accesos')->with('error', 'Acceso no encontrado.');
+        }
+        if (! $this->reasignable($acceso)) {
+            return redirect()->to('accesos/' . $id)->with('error', 'Este acceso ya no se puede reasignar.');
+        }
+
+        $cid   = (int) $this->activeCondominioId();
+        $casas = (new \App\Models\CasaModel())->where('condominio_id', $cid)->orderBy('identificador', 'ASC')->findAll();
+
+        return view('caseta/reasignar', [
+            'title'         => 'Corregir casa del registro',
+            'acceso'        => $acceso,
+            'casas'         => $casas,
+            'destinatarios' => \App\Libraries\CasaResidents::mapForCondominio($cid),
+        ]);
+    }
+
+    public function reasignar(int $id): RedirectResponse
+    {
+        $acceso = $this->scoped($id);
+        if ($acceso === null) {
+            return redirect()->to('accesos')->with('error', 'Acceso no encontrado.');
+        }
+        if (! $this->reasignable($acceso)) {
+            return redirect()->to('accesos/' . $id)->with('error', 'Este acceso ya no se puede reasignar.');
+        }
+
+        $cid    = (int) $this->activeCondominioId();
+        $casaId = (int) $this->request->getPost('casa_id');
+        $casa   = (new \App\Models\CasaModel())->where('condominio_id', $cid)->find($casaId);
+        if ($casa === null) {
+            return redirect()->back()->withInput()->with('error', 'Selecciona una casa de este condominio.');
+        }
+
+        // New recipient: caseta's pick validated against the casa's residents, else default.
+        $destId   = (int) $this->request->getPost('destinatario_persona_id');
+        $validIds = array_map(static fn ($r) => (int) $r['id'], \App\Libraries\CasaResidents::forCasa($casaId));
+        if ($destId <= 0 || ! in_array($destId, $validIds, true)) {
+            $destId = \App\Libraries\CasaResidents::defaultRecipient($casaId) ?? 0;
+        }
+
+        $oldPersona = (int) ($acceso['solicitante_persona_id'] ?? 0);
+        $oldCasaId  = (int) $acceso['casa_id'];
+        if ($casaId === $oldCasaId && $destId === $oldPersona) {
+            return redirect()->to('accesos/' . $id)->with('error', 'No hay cambios que aplicar.');
+        }
+
+        $this->model->update($id, ['casa_id' => $casaId, 'solicitante_persona_id' => $destId ?: null]);
+        $fresh = $this->model->find($id);
+
+        (new AccesoEventoModel())->log($id, $acceso['estado'], $acceso['estado'], auth()->id(),
+            'Reasignado a casa ' . ($casa['identificador'] ?? $casaId));
+
+        // Correct the previous resident (if any and different) and neutralize their old notification.
+        if ($oldPersona > 0 && $oldPersona !== $destId) {
+            Notify::toPersona($oldPersona, $fresh, '⚠️ Corrección de registro',
+                'El registro que se te notificó se reasignó a otra vivienda. Puedes ignorar el aviso anterior.',
+                'portal/paquetes');
+            (new \App\Models\NotificacionModel())->markCorrected($id, $oldPersona);
+        }
+
+        // Notify the new resident with the normal arrival message.
+        if ($destId > 0) {
+            $msg = $fresh['tipo'] === 'paqueteria'
+                ? trim(($fresh['empresa'] ? $fresh['empresa'] . ' — ' : '') . $fresh['nombre_visitante']) . '. Recógelo en caseta.'
+                : $fresh['nombre_visitante'] . ' está en el acceso para tu casa.';
+            $titulo = $fresh['tipo'] === 'paqueteria' ? 'Tienes un paquete en caseta' : 'Llegó tu ' . (AccesoModel::TIPOS[$fresh['tipo']] ?? 'registro');
+            Notify::acceso($fresh, $titulo, $msg, 'portal/paquetes');
+        }
+
+        return redirect()->to('accesos/' . $id)->with('success', 'Registro reasignado y notificaciones corregidas. ✅');
+    }
+
+    /** Whether a caseta-registered acceso can still be reassigned. */
+    private function reasignable(array $acceso): bool
+    {
+        return in_array($acceso['tipo'], ['paqueteria', 'delivery', 'proveedor'], true)
+            && in_array($acceso['estado'], ['en_caseta', 'programado', 'ingresado'], true);
+    }
+
     /** Form to hand a package over to the resident (captures a proof photo). */
     public function entregarForm(int $id): string|RedirectResponse
     {

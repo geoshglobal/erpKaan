@@ -63,6 +63,8 @@ $routes->group('', ['filter' => 'session'], static function (RouteCollection $ro
         $routes->post('registro', 'Caseta::registrar');
         $routes->get('accesos/(:num)/entregar', 'Caseta::entregarForm/$1');
         $routes->post('accesos/(:num)/entregar', 'Caseta::entregar/$1');
+        $routes->get('accesos/(:num)/reasignar', 'Caseta::reasignarForm/$1');
+        $routes->post('accesos/(:num)/reasignar', 'Caseta::reasignar/$1');
         $routes->get('accesos/(:num)/checkin', 'Caseta::checkinForm/$1');
         $routes->post('accesos/(:num)/checkin', 'Caseta::checkin/$1');
         $routes->post('accesos/(:num)/solicitar-cajon', 'Caseta::solicitarCajon/$1');

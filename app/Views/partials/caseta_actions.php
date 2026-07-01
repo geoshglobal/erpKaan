@@ -19,4 +19,8 @@ $estado = AccesoModel::estadoEfectivo($acceso);
     <?php else: ?>
         <p class="muted" style="margin:0;">Sin acciones disponibles (<?= esc(AccesoModel::ESTADOS[$estado] ?? $estado) ?>).</p>
     <?php endif; ?>
+
+    <?php if (in_array($acceso['tipo'], ['paqueteria', 'delivery', 'proveedor'], true) && in_array($estado, ['en_caseta', 'programado', 'ingresado'], true)): ?>
+        <a class="btn secondary small" style="margin-left:.4rem;" href="<?= site_url('caseta/accesos/' . $acceso['id'] . '/reasignar') ?>">✏️ Corregir casa</a>
+    <?php endif; ?>
 </div>

@@ -331,6 +331,12 @@ notifications = **in-app → email → push** · visits = **immediate AND schedu
   pages. **Date-range filter (default last 15 days)** on accesos, visitas, paquetes and
   notificaciones via `BaseController::dateRange()` (tz-aware local→UTC boundaries on `created_at`,
   `Tz::boundary`/`Tz::localDate`) + reusable `partials/date_filter`.
+- **Reassign casa + notification correction:** caseta can correct a mis-assigned caseta-registered
+  acceso (paquetería/delivery/proveedor still en_caseta/programado/ingresado) via `caseta/accesos/
+  {id}/reasignar` ("✏️ Corregir casa"). It updates `casa_id`+`solicitante_persona_id`, logs an event,
+  **notifies the previous resident of the mistake** (`Notify::toPersona`) and **neutralizes their old
+  in-app notification** (`NotificacionModel::markCorrected` — an UPDATE, prod-safe), then sends the
+  normal arrival notification to the new resident. `Notify::acceso` now delegates to `toPersona`.
 - **Delivery/proveedor notifications are tipo-specific:** caseta check-in/out and cajón messages
   now say "Tu delivery/proveedor llegó/salió" (not "visita") and link non-visita accesos to
   `portal/paquetes` instead of `portal/visitas/{id}`.
