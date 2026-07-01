@@ -22,6 +22,8 @@ $routes->group('', ['filter' => 'session'], static function (RouteCollection $ro
     $routes->get('notificaciones', 'Notificaciones::index');
     $routes->get('portal/perfil', 'Portal::perfil');
     $routes->post('portal/perfil', 'Portal::updatePerfil');
+    $routes->get('portal/autorizaciones', 'Portal::autorizaciones');
+    $routes->post('portal/autorizaciones/(:num)', 'Portal::autorizarCajon/$1');
     // Resident visits (tipo=visita) + QR pass.
     $routes->get('portal/visitas', 'Visitas::index');
     $routes->get('portal/visitas/nueva', 'Visitas::new');

@@ -4,6 +4,9 @@ namespace App\Controllers;
 
 use App\Libraries\OccupancyRules;
 use App\Libraries\OccupantInvite;
+use App\Models\AccesoEventoModel;
+use App\Models\AccesoModel;
+use App\Models\CajonModel;
 use App\Models\CasaPropietarioModel;
 use App\Models\InvitacionModel;
 use App\Models\OcupacionModel;
@@ -41,6 +44,68 @@ class Portal extends BaseController
             'propiedades' => $propiedades,
             'ocupaciones' => $ocupaciones,
         ]);
+    }
+
+    /** Parking authorization requests addressed to this resident. */
+    public function autorizaciones(): string|RedirectResponse
+    {
+        $persona = $this->ownPersona();
+        if ($persona === null) {
+            return redirect()->to('portal')->with('error', 'Tu usuario no está vinculado a una persona.');
+        }
+
+        return view('portal/autorizaciones', [
+            'title'      => 'Autorizaciones',
+            'pendientes' => $this->pendingAuths((int) $persona['id']),
+        ]);
+    }
+
+    public function autorizarCajon(int $id): RedirectResponse
+    {
+        $persona = $this->ownPersona();
+        if ($persona === null) {
+            return redirect()->to('portal')->with('error', 'Acción no permitida.');
+        }
+
+        $accesos = new AccesoModel();
+        $acceso  = $accesos->where('solicitante_persona_id', $persona['id'])
+            ->where('condominio_id', $this->activeCondominioId())
+            ->find($id);
+        if ($acceso === null || $acceso['autorizacion_cajon'] !== 'pendiente') {
+            return redirect()->to('portal/autorizaciones')->with('error', 'Solicitud no encontrada.');
+        }
+
+        if ($this->request->getPost('decision') === 'autorizar') {
+            $cajon = (new CajonModel())
+                ->where('condominio_id', $this->activeCondominioId())
+                ->where('casa_id', $acceso['casa_id'])
+                ->where('activo', 1)
+                ->first();
+            $accesos->update($id, ['autorizacion_cajon' => 'autorizado', 'cajon_id' => $cajon['id'] ?? null]);
+            (new AccesoEventoModel())->log($id, $acceso['estado'], $acceso['estado'], auth()->id(),
+                'Residente autorizó el uso de su cajón' . ($cajon ? ' (' . $cajon['identificador'] . ')' : ''));
+            $msg = 'Autorización concedida.';
+        } else {
+            $accesos->update($id, ['autorizacion_cajon' => 'rechazado']);
+            (new AccesoEventoModel())->log($id, $acceso['estado'], $acceso['estado'], auth()->id(),
+                'Residente rechazó el uso de su cajón');
+            $msg = 'Solicitud rechazada.';
+        }
+
+        return redirect()->to('portal/autorizaciones')->with('success', $msg);
+    }
+
+    /** Pending parking authorizations for a persona. @return list<array<string,mixed>> */
+    private function pendingAuths(int $personaId): array
+    {
+        return (new AccesoModel())
+            ->select('accesos.*, casas.identificador AS casa_ident')
+            ->join('casas', 'casas.id = accesos.casa_id', 'left')
+            ->where('accesos.solicitante_persona_id', $personaId)
+            ->where('accesos.autorizacion_cajon', 'pendiente')
+            ->where('accesos.condominio_id', $this->activeCondominioId())
+            ->orderBy('accesos.id', 'DESC')
+            ->findAll();
     }
 
     public function perfil(): string|RedirectResponse

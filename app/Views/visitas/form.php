@@ -40,6 +40,12 @@
             <div class="field"><label>Placas del vehículo</label>
                 <input type="text" name="placas" value="<?= esc(old('placas')) ?>"></div>
         </div>
+        <div class="field">
+            <label style="display:flex; gap:.5rem; align-items:center; font-weight:400;">
+                <input type="checkbox" name="permite_vehiculo" value="1" <?= old('permite_vehiculo') ? 'checked' : '' ?> style="width:auto;">
+                Permitir acceso en vehículo
+            </label>
+        </div>
     </fieldset>
 
     <fieldset>

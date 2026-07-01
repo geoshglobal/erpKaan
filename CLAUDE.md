@@ -246,9 +246,21 @@ notifications = **in-app → email → push** · visits = **immediate AND schedu
   dropdown containing Cerrar sesión. Email/push channels still pending. **F2 core = F2.0–F2.2
   + F2.4 done.** Remaining: F2.3 paquetería/delivery, F2.4 email/push, F2.5 guest access.
 
-### F2 backlog — visitor vehicle access + parking (PLANNED, not built)
+### F2 backlog — visitor vehicle access + parking (DONE 2026-07-01)
 
-Requested 2026-06-30; to build later:
+`accesos` gained `permite_vehiculo`, `cajon_id`, `autorizacion_cajon`.
+1. ✅ Resident authorizes vehicle on the visit (`permite_vehiculo` checkbox on the new-visit
+   form; shown on detail; caseta check-in warns if not authorized).
+2. ✅ Visitor parking via `cajones` tipo='visita'. `Parking` library computes available spots
+   (visitor cajones not held by an `ingresado` acceso). Check-in with a vehicle assigns a free
+   visitor spot; if none free, caseta can request the resident's spot → `autorizacion_cajon`
+   'pendiente' + notification → resident approves/denies at `portal/autorizaciones` (approve
+   assigns a casa cajon, sets 'autorizado'). Spot frees automatically on check-out (estado
+   leaves 'ingresado').
+3. ✅ Caseta "Tomar foto" button: live camera (getUserMedia) → canvas → sets the id_foto file
+   input via DataTransfer; falls back to file picker. All verified end-to-end.
+
+Original request (2026-06-30):
 1. **Resident authorizes vehicle on the visit.** The "Nueva visita" form (resident) should
    include "¿se permite acceso en vehículo?" — add `accesos.permite_vehiculo` (bool). This
    is the resident's authorization at creation, distinct from caseta's `ingreso_vehiculo`

@@ -23,6 +23,7 @@ $tipos  = ['visita' => 'Visita', 'paqueteria' => 'Paquetería', 'delivery' => 'D
         <?php if ($acceso['empresa']): ?><p style="margin:.25rem 0;"><span class="muted">Motivo/empresa:</span> <?= esc($acceso['empresa']) ?></p><?php endif; ?>
         <?php if ($acceso['telefono']): ?><p style="margin:.25rem 0;"><span class="muted">Teléfono:</span> <?= esc($acceso['telefono']) ?></p><?php endif; ?>
         <?php if ($acceso['placas']): ?><p style="margin:.25rem 0;"><span class="muted">Placas:</span> <?= esc($acceso['placas']) ?></p><?php endif; ?>
+        <p style="margin:.25rem 0;"><span class="muted">Vehículo autorizado:</span> <?= ! empty($acceso['permite_vehiculo']) ? 'Sí' : 'No' ?></p>
         <p style="margin:.25rem 0;"><span class="muted">Vigencia:</span>
             <?= $acceso['valido_desde'] ? esc(date('d/m/Y H:i', strtotime($acceso['valido_desde']))) : '—' ?>
             <?= $acceso['valido_hasta'] ? ' → ' . esc(date('d/m/Y H:i', strtotime($acceso['valido_hasta']))) : '' ?></p>
@@ -30,6 +31,10 @@ $tipos  = ['visita' => 'Visita', 'paqueteria' => 'Paquetería', 'delivery' => 'D
         <?php if ($acceso['check_in_at']): ?><p class="muted" style="margin:.5rem 0 0; font-size:.85rem;">Entrada: <?= esc($acceso['check_in_at']) ?></p><?php endif; ?>
         <?php if ($acceso['pax_ingresaron'] !== null): ?><p class="muted" style="margin:.1rem 0 0; font-size:.85rem;">Ingresaron: <?= (int) $acceso['pax_ingresaron'] ?> persona(s)<?= (int) $acceso['pax_ingresaron'] > (int) $acceso['num_personas'] ? ' ⚠️ (más de lo registrado)' : '' ?></p><?php endif; ?>
         <?php if (! empty($acceso['ingreso_vehiculo'])): ?><p class="muted" style="margin:.1rem 0 0; font-size:.85rem;">Vehículo<?= $acceso['folio_corbatin'] ? ' · folio ' . esc($acceso['folio_corbatin']) : '' ?><?= $acceso['placas'] ? ' · placas ' . esc($acceso['placas']) : '' ?></p><?php endif; ?>
+        <?php if (! empty($acceso['autorizacion_cajon'])): ?>
+            <?php $az = ['pendiente' => '⏳ Cajón del residente: autorización pendiente', 'autorizado' => '✅ Cajón del residente autorizado', 'rechazado' => '⛔ Autorización de cajón rechazada']; ?>
+            <p class="muted" style="margin:.1rem 0 0; font-size:.85rem;"><?= esc($az[$acceso['autorizacion_cajon']] ?? $acceso['autorizacion_cajon']) ?></p>
+        <?php endif; ?>
         <?php if (! empty($acceso['sin_id'])): ?><p class="muted" style="margin:.1rem 0 0; font-size:.85rem;">Sin ID<?= $acceso['id_nota'] ? ': ' . esc($acceso['id_nota']) : '' ?></p><?php endif; ?>
         <?php if (! empty($acceso['id_foto_path'])): ?><p style="margin:.4rem 0 0;"><a href="<?= base_url(esc($acceso['id_foto_path'])) ?>" target="_blank"><img src="<?= base_url(esc($acceso['id_foto_path'])) ?>" alt="ID" style="max-height:80px; border-radius:8px; border:1px solid #cbd5e1;"></a></p><?php endif; ?>
         <?php if ($acceso['check_out_at']): ?><p class="muted" style="margin:.5rem 0 0; font-size:.85rem;">Salida: <?= esc($acceso['check_out_at']) ?></p><?php endif; ?>

@@ -76,6 +76,7 @@ class Visitas extends BaseController
             'telefono'               => $this->request->getPost('telefono') ?: null,
             'num_personas'           => (int) ($this->request->getPost('num_personas') ?: 1),
             'placas'                 => $this->request->getPost('placas') ?: null,
+            'permite_vehiculo'       => $this->request->getPost('permite_vehiculo') ? 1 : 0,
             'notas'                  => $this->request->getPost('notas') ?: null,
             'qr_token'               => bin2hex(random_bytes(24)),
             'valido_desde'           => $desde,

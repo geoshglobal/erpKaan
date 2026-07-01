@@ -37,10 +37,13 @@ class Caseta extends BaseController
             return redirect()->to('accesos/' . $id)->with('error', 'Este acceso no admite registro de entrada.');
         }
 
+        $parking = new \App\Libraries\Parking();
+
         return view('caseta/checkin', [
-            'title'       => 'Registrar entrada',
-            'acceso'      => $acceso,
-            'solicitante' => $acceso['solicitante_persona_id'] ? (new PersonaModel())->find($acceso['solicitante_persona_id']) : null,
+            'title'         => 'Registrar entrada',
+            'acceso'        => $acceso,
+            'solicitante'   => $acceso['solicitante_persona_id'] ? (new PersonaModel())->find($acceso['solicitante_persona_id']) : null,
+            'cajonesLibres' => $parking->availableVisitorSpots((int) $this->activeCondominioId()),
         ]);
     }
 
@@ -79,6 +82,20 @@ class Caseta extends BaseController
             $data['id_foto_path'] = $path;
         }
 
+        // Parking assignment for vehicles.
+        $needAuth = false;
+        if ($vehiculo) {
+            $parking = new \App\Libraries\Parking();
+            $cajonId = (int) $this->request->getPost('cajon_id');
+            if ($cajonId && $parking->isFreeVisitorSpot((int) $this->activeCondominioId(), $cajonId)) {
+                $data['cajon_id']           = $cajonId;
+                $data['autorizacion_cajon'] = null;
+            } elseif ($this->request->getPost('usar_cajon_residente')) {
+                $data['autorizacion_cajon'] = 'pendiente';
+                $needAuth                   = true;
+            }
+        }
+
         $this->model->update($id, $data);
 
         $nota = 'Entrada. Pax: ' . $data['pax_ingresaron']
@@ -92,7 +109,20 @@ class Caseta extends BaseController
             $acceso['nombre_visitante'] . ' ingresó al condominio' . ($vehiculo ? ' en vehículo' : '') . '.'
         );
 
-        return redirect()->to('accesos/' . $id)->with('success', 'Entrada registrada. ✅');
+        if ($needAuth) {
+            Notify::acceso(
+                $acceso,
+                'Autoriza el uso de tu cajón',
+                'No hay cajones de visita disponibles para ' . $acceso['nombre_visitante']
+                . '. Autoriza o rechaza el uso de tu cajón en “Mi portal → Autorizaciones”.'
+            );
+        }
+
+        $msg = $needAuth
+            ? 'Entrada registrada. Se solicitó autorización del residente para el cajón. ⏳'
+            : 'Entrada registrada. ✅';
+
+        return redirect()->to('accesos/' . $id)->with('success', $msg);
     }
 
     public function checkout(int $id): RedirectResponse

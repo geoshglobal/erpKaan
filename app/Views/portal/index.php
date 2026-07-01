@@ -65,6 +65,7 @@ $usos = ['propio' => 'Uso propio', 'renta_lineal' => 'Renta lineal', 'renta_vaca
         <p class="muted" style="margin:.2rem 0 .75rem; font-size:.9rem;">Genera pases QR para tus visitantes.</p>
         <a class="btn" href="<?= site_url('portal/visitas') ?>">Mis visitas</a>
         <a class="btn secondary" href="<?= site_url('portal/visitas/nueva') ?>">+ Nueva visita</a>
+        <a class="btn secondary" href="<?= site_url('portal/autorizaciones') ?>">Autorizaciones de cajón</a>
     </div>
 
     <p class="muted" style="margin-top:1.5rem; font-size:.85rem;">

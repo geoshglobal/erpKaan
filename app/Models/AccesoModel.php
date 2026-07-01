@@ -17,8 +17,8 @@ class AccesoModel extends Model
     protected $allowedFields = [
         'condominio_id', 'casa_id', 'tipo', 'solicitante_persona_id', 'creado_por_user_id',
         'nombre_visitante', 'empresa', 'telefono', 'num_personas', 'pax_ingresaron',
-        'placas', 'ingreso_vehiculo', 'folio_corbatin', 'foto_path', 'id_foto_path',
-        'sin_id', 'id_nota',
+        'placas', 'permite_vehiculo', 'ingreso_vehiculo', 'folio_corbatin', 'cajon_id',
+        'autorizacion_cajon', 'foto_path', 'id_foto_path', 'sin_id', 'id_nota',
         'qr_token', 'valido_desde', 'valido_hasta', 'estado',
         'check_in_at', 'check_out_at', 'caseta_user_id', 'notas',
     ];

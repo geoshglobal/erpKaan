@@ -52,11 +52,34 @@ $reg = (int) $acceso['num_personas'];
             </label>
         </div>
         <div id="veh" style="display:none;">
+            <?php if (empty($acceso['permite_vehiculo'])): ?>
+                <div class="alert error" style="margin-bottom:.75rem;">⚠️ El residente <strong>no autorizó</strong> acceso en vehículo. Confírmalo antes de permitir el ingreso.</div>
+            <?php endif; ?>
             <div class="grid2">
                 <div class="field"><label>Folio de corbatín / cono</label>
                     <input type="text" name="folio_corbatin" placeholder="Ej. V-045"></div>
                 <div class="field"><label>Placas</label>
                     <input type="text" name="placas" value="<?= esc($acceso['placas'] ?? '') ?>"></div>
+            </div>
+
+            <div class="field">
+                <label>Cajón de estacionamiento</label>
+                <?php if ($cajonesLibres !== []): ?>
+                    <select name="cajon_id">
+                        <?php foreach ($cajonesLibres as $c): ?>
+                            <option value="<?= (int) $c['id'] ?>">Cajón de visita <?= esc($c['identificador']) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    <div class="muted" style="font-size:.78rem; margin-top:.25rem;"><?= count($cajonesLibres) ?> cajón(es) de visita disponible(s).</div>
+                <?php else: ?>
+                    <div class="alert error" style="margin:0;">
+                        No hay cajones de visita disponibles.
+                        <label style="display:flex; gap:.5rem; align-items:center; font-weight:400; margin-top:.5rem;">
+                            <input type="checkbox" name="usar_cajon_residente" value="1" style="width:auto;">
+                            Usar cajón del residente (se solicitará su autorización)
+                        </label>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
     </fieldset>
@@ -65,8 +88,18 @@ $reg = (int) $acceso['num_personas'];
         <legend>Identificación</legend>
         <div class="field">
             <label>Foto de la ID (o del visitante)</label>
-            <input type="file" name="id_foto" accept="image/*" capture="environment">
-            <div class="muted" style="font-size:.78rem; margin-top:.25rem;">Puedes tomar la foto con la cámara.</div>
+            <div style="display:flex; gap:.5rem; flex-wrap:wrap; align-items:center;">
+                <button type="button" class="btn secondary small" id="btn-cam">📷 Tomar foto</button>
+                <input type="file" name="id_foto" id="id_foto" accept="image/*" capture="environment">
+            </div>
+            <video id="cam" playsinline muted style="display:none; width:100%; max-width:320px; margin-top:.5rem; border-radius:8px; background:#000;"></video>
+            <div id="cam-actions" style="display:none; margin-top:.5rem; display:none;">
+                <button type="button" class="btn small" id="btn-capture">Capturar</button>
+                <button type="button" class="btn secondary small" id="btn-cancelcam">Cancelar</button>
+            </div>
+            <canvas id="cam-canvas" style="display:none;"></canvas>
+            <img id="cam-preview" alt="" style="display:none; max-width:200px; border-radius:8px; margin-top:.5rem; border:1px solid #cbd5e1;">
+            <div class="muted" style="font-size:.78rem; margin-top:.25rem;">Toma la foto con la cámara o selecciona un archivo.</div>
         </div>
         <div class="field">
             <label style="display:flex; gap:.5rem; align-items:center; font-weight:400;">
@@ -103,6 +136,46 @@ $reg = (int) $acceso['num_personas'];
     });
     document.getElementById('noid-check').addEventListener('change', function () {
         document.getElementById('noid').style.display = this.checked ? 'block' : 'none';
+    });
+
+    // Live-camera capture for the ID photo.
+    var video = document.getElementById('cam');
+    var camActions = document.getElementById('cam-actions');
+    var canvas = document.getElementById('cam-canvas');
+    var preview = document.getElementById('cam-preview');
+    var fileInput = document.getElementById('id_foto');
+    var stream = null;
+
+    function stopCam() {
+        if (stream) { stream.getTracks().forEach(function (t) { t.stop(); }); stream = null; }
+        video.style.display = 'none';
+        camActions.style.display = 'none';
+    }
+
+    document.getElementById('btn-cam').addEventListener('click', function () {
+        if (! navigator.mediaDevices || ! navigator.mediaDevices.getUserMedia) {
+            alert('Tu navegador no permite la cámara aquí; selecciona un archivo.');
+            return;
+        }
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+            .then(function (s) {
+                stream = s; video.srcObject = s; video.play();
+                video.style.display = 'block'; camActions.style.display = 'block';
+            })
+            .catch(function (e) { alert('No se pudo abrir la cámara: ' + e); });
+    });
+
+    document.getElementById('btn-cancelcam').addEventListener('click', stopCam);
+
+    document.getElementById('btn-capture').addEventListener('click', function () {
+        canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0);
+        canvas.toBlob(function (blob) {
+            var file = new File([blob], 'id-captura.jpg', { type: 'image/jpeg' });
+            var dt = new DataTransfer(); dt.items.add(file); fileInput.files = dt.files;
+            preview.src = URL.createObjectURL(blob); preview.style.display = 'block';
+            stopCam();
+        }, 'image/jpeg', 0.9);
     });
 })();
 </script>
