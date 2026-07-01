@@ -17,7 +17,10 @@
         :root { --accent:#2C6E52; --accent2:#43A074; --cream:#F6F4ED; --ink:#1C2621; --line:#dbe5de; }
         body { background:var(--cream); color:var(--ink); font-family:'Plus Jakarta Sans', system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
         .auth-brand { text-align:center; margin:2.2rem 0 1rem; }
-        .auth-brand img { height:44px; width:auto; }
+        .auth-brand a { display:inline-flex; align-items:center; gap:.6rem; text-decoration:none; }
+        .auth-brand img { height:48px; width:auto; }
+        .auth-brand .wordmark { color:var(--ink); font-weight:800; font-size:1.7rem; letter-spacing:-.02em; }
+        .auth-brand .wordmark b { color:var(--accent); }
         .card { border:1px solid var(--line); border-radius:16px; box-shadow:0 10px 30px rgba(28,38,33,.06); }
         .card-header { background:#fff; border-bottom:1px solid var(--line); font-weight:800; }
         h1, h2, h3, .h1, .h2, .h3, .card-header { letter-spacing:-.01em; }
@@ -31,7 +34,10 @@
 </head>
 <body>
     <div class="auth-brand">
-        <a href="<?= site_url('/') ?>"><img src="<?= base_url('brand/svg/erpKaan-logotipo-horizontal.svg') ?>" alt="erpKaan"></a>
+        <a href="<?= site_url('/') ?>">
+            <img src="<?= base_url('brand/svg/erpKaan-isotipo.svg') ?>" alt="">
+            <span class="wordmark">erp<b>Kaan</b></span>
+        </a>
     </div>
     <main role="main" class="container">
         <?= $this->renderSection('main') ?>
