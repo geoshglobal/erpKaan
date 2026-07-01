@@ -53,6 +53,7 @@ $pillClass = ['programado' => 'on', 'ingresado' => 'on', 'finalizado' => 'off', 
             <?php endforeach; ?>
         </tbody>
     </table>
+    <?= $pager->links('default', 'kaan') ?>
 <?php endif; ?>
 
 <?= $this->endSection() ?>

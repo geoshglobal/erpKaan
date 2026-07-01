@@ -25,6 +25,7 @@
             </<?= $tag ?>>
         <?php endforeach; ?>
     </div>
+    <?= $pager->links('default', 'kaan') ?>
 <?php endif; ?>
 
 <?= $this->endSection() ?>

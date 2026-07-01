@@ -58,13 +58,42 @@ class AccesoModel extends Model
     /** All accesos of a condominio with casa + requester name (supervision). @return list<array<string,mixed>> */
     public function forCondominio(int $condominioId): array
     {
-        return $this->select('accesos.*, casas.identificador AS casa_ident,
+        return $this->scopeForCondominio($condominioId, [])->findAll();
+    }
+
+    /**
+     * Supervision query with optional filters (for pagination). Returns $this so
+     * the caller can chain ->paginate($n).
+     *
+     * @param array{casa_id?:int,tipo?:string,estado?:string,q?:string} $filters
+     */
+    public function scopeForCondominio(int $condominioId, array $filters = []): self
+    {
+        $this->select('accesos.*, casas.identificador AS casa_ident,
                 TRIM(CONCAT(personas.nombre, " ", COALESCE(personas.apellido_paterno, ""))) AS solicitante')
             ->join('casas', 'casas.id = accesos.casa_id', 'left')
             ->join('personas', 'personas.id = accesos.solicitante_persona_id', 'left')
-            ->where('accesos.condominio_id', $condominioId)
-            ->orderBy('accesos.id', 'DESC')
-            ->findAll();
+            ->where('accesos.condominio_id', $condominioId);
+
+        if (! empty($filters['casa_id'])) {
+            $this->where('accesos.casa_id', (int) $filters['casa_id']);
+        }
+        if (! empty($filters['tipo']) && isset(self::TIPOS[$filters['tipo']])) {
+            $this->where('accesos.tipo', $filters['tipo']);
+        }
+        if (! empty($filters['estado'])) {
+            $this->where('accesos.estado', $filters['estado']);
+        }
+        if (! empty($filters['q'])) {
+            $q = trim((string) $filters['q']);
+            $this->groupStart()
+                ->like('accesos.nombre_visitante', $q)
+                ->orLike('casas.identificador', $q)
+                ->orLike('accesos.empresa', $q)
+                ->groupEnd();
+        }
+
+        return $this->orderBy('accesos.id', 'DESC');
     }
 
     /**
@@ -75,14 +104,20 @@ class AccesoModel extends Model
      */
     public function forSolicitante(int $personaId, ?array $tipos = null): array
     {
-        $q = $this->select('accesos.*, casas.identificador AS casa_ident')
+        return $this->scopeForSolicitante($personaId, $tipos)->findAll();
+    }
+
+    /** Query for a solicitante (returns $this to chain ->paginate($n)). @param list<string>|null $tipos */
+    public function scopeForSolicitante(int $personaId, ?array $tipos = null): self
+    {
+        $this->select('accesos.*, casas.identificador AS casa_ident')
             ->join('casas', 'casas.id = accesos.casa_id', 'left')
             ->where('accesos.solicitante_persona_id', $personaId);
         if ($tipos !== null) {
-            $q->whereIn('accesos.tipo', $tipos);
+            $this->whereIn('accesos.tipo', $tipos);
         }
 
-        return $q->orderBy('accesos.id', 'DESC')->findAll();
+        return $this->orderBy('accesos.id', 'DESC');
     }
 
     /**

@@ -57,6 +57,7 @@ $pill = ['en_caseta' => 'on', 'entregado' => 'off', 'ingresado' => 'on', 'finali
             </div>
         <?php endforeach; ?>
     </div>
+    <?= $pager->links('default', 'kaan') ?>
 <?php endif; ?>
 
 <?= $this->endSection() ?>

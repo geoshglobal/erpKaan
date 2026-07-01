@@ -260,11 +260,12 @@ class Caseta extends BaseController
             . ($acceso['autorizacion_cajon'] ? ', cajón residente ' . $acceso['autorizacion_cajon'] : '');
         (new AccesoEventoModel())->log($id, 'ingresado', $acceso['estado'], auth()->id(), $nota);
 
+        $tl = strtolower(AccesoModel::TIPOS[$acceso['tipo']] ?? 'visita');
         Notify::acceso(
             $acceso,
-            'Tu visita llegó',
+            'Tu ' . $tl . ' llegó',
             $acceso['nombre_visitante'] . ' ingresó al condominio' . ($vehiculo ? ' en vehículo' : '') . '.',
-            'portal/visitas/' . $id
+            $acceso['tipo'] === 'visita' ? 'portal/visitas/' . $id : 'portal/paquetes'
         );
 
         return redirect()->to('accesos/' . $id)->with('success', 'Entrada registrada. ✅');
@@ -304,7 +305,7 @@ class Caseta extends BaseController
             $acceso,
             'Se usó tu cajón',
             'Se autorizó por teléfono el uso de tu cajón para ' . $acceso['nombre_visitante'] . '.',
-            'portal/visitas/' . $id
+            $acceso['tipo'] === 'visita' ? 'portal/visitas/' . $id : 'portal/paquetes'
         );
 
         return redirect()->to('caseta/accesos/' . $id . '/checkin')
@@ -324,7 +325,9 @@ class Caseta extends BaseController
         $this->model->update($id, ['estado' => 'finalizado', 'check_out_at' => date('Y-m-d H:i:s')]);
         (new AccesoEventoModel())->log($id, 'finalizado', 'ingresado', auth()->id(), 'Salida registrada en caseta');
 
-        Notify::acceso($acceso, 'Tu visita salió', $acceso['nombre_visitante'] . ' salió del condominio.', 'portal/visitas/' . $id);
+        $tl = strtolower(AccesoModel::TIPOS[$acceso['tipo']] ?? 'visita');
+        Notify::acceso($acceso, 'Tu ' . $tl . ' salió', $acceso['nombre_visitante'] . ' salió del condominio.',
+            $acceso['tipo'] === 'visita' ? 'portal/visitas/' . $id : 'portal/paquetes');
 
         return redirect()->to('accesos/' . $id)->with('success', 'Salida registrada. 👋');
     }

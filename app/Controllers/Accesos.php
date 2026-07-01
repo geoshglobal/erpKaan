@@ -24,9 +24,26 @@ class Accesos extends BaseController
 
     public function index(): string
     {
+        $cid     = (int) $this->activeCondominioId();
+        $filters = [
+            'casa_id' => (int) $this->request->getGet('casa_id'),
+            'tipo'    => (string) $this->request->getGet('tipo'),
+            'estado'  => (string) $this->request->getGet('estado'),
+            'q'       => trim((string) $this->request->getGet('q')),
+        ];
+
+        $accesos = $this->model->scopeForCondominio($cid, $filters)->paginate(20);
+        $pager   = $this->model->pager;
+        $pager->only(['casa_id', 'tipo', 'estado', 'q']);
+
+        $casas = (new CasaModel())->where('condominio_id', $cid)->orderBy('identificador', 'ASC')->findAll();
+
         return view('accesos/index', [
             'title'   => 'Accesos',
-            'accesos' => $this->model->forCondominio((int) $this->activeCondominioId()),
+            'accesos' => $accesos,
+            'pager'   => $pager,
+            'casas'   => $casas,
+            'filters' => $filters,
         ]);
     }
 

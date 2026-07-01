@@ -9,13 +9,16 @@ class Notificaciones extends BaseController
 {
     public function index(): string
     {
+        $uid   = (int) auth()->id();
         $model = new NotificacionModel();
-        $items = $model->forUser((int) auth()->id());
-        $model->markAllRead((int) auth()->id()); // viewing clears the unread badge
+        $items = $model->where('user_id', $uid)->orderBy('id', 'DESC')->paginate(20);
+        $pager = $model->pager;
+        $model->markAllRead($uid); // viewing clears the unread badge
 
         return view('notificaciones/index', [
             'title' => 'Notificaciones',
             'items' => $items,
+            'pager' => $pager,
         ]);
     }
 

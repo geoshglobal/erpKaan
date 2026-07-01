@@ -34,9 +34,12 @@ class Visitas extends BaseController
             return redirect()->to('portal')->with('error', 'Tu usuario no está vinculado a una persona en este condominio.');
         }
 
+        $visitas = $this->model->scopeForSolicitante((int) $persona['id'], ['visita'])->paginate(15);
+
         return view('visitas/index', [
             'title'   => 'Mis visitas',
-            'visitas' => $this->model->forSolicitante((int) $persona['id'], ['visita']),
+            'visitas' => $visitas,
+            'pager'   => $this->model->pager,
         ]);
     }
 
@@ -130,9 +133,12 @@ class Visitas extends BaseController
             return redirect()->to('portal')->with('error', 'Tu usuario no está vinculado a una persona en este condominio.');
         }
 
+        $paquetes = $this->model->scopeForSolicitante((int) $persona['id'], ['paqueteria', 'delivery', 'proveedor'])->paginate(15);
+
         return view('paquetes/index', [
             'title'    => 'Paquetería y entregas',
-            'paquetes' => $this->model->forSolicitante((int) $persona['id'], ['paqueteria', 'delivery', 'proveedor']),
+            'paquetes' => $paquetes,
+            'pager'    => $this->model->pager,
         ]);
     }
 

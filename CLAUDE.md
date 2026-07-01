@@ -321,6 +321,17 @@ notifications = **in-app → email → push** · visits = **immediate AND schedu
   picker) to any caseta photo field — used in `caseta/registro` and the new deliver-photo form.
 - **Mark-delivered captures a photo:** `Caseta::entregarForm` (GET) → `caseta/entregar` view with
   file+camera → `entregar` (POST) stores `accesos.foto_entrega_path` as proof, then notifies.
+- **Pagination + accesos search/filters:** transactional listings paginate (CI4 `paginate()` +
+  a custom `partials/pager` template registered as `kaan` in `Config\Pager`): accesos (20/pg),
+  visitas + paquetes (15/pg), notificaciones (20/pg). The **accesos supervision panel** (used by
+  superadmin/caseta) gained **tipo tabs** (Todos/Visita/Delivery/Proveedor/Paquetería) and a
+  **filter form**: by **departamento (casa)** + free-text (visitor/casa/empresa) + estado — so
+  caseta can find a pass by department when NOT scanning the QR. `AccesoModel::scopeForCondominio`
+  / `scopeForSolicitante` build filtered queries; `$pager->only([...])` preserves filters across
+  pages.
+- **Delivery/proveedor notifications are tipo-specific:** caseta check-in/out and cajón messages
+  now say "Tu delivery/proveedor llegó/salió" (not "visita") and link non-visita accesos to
+  `portal/paquetes` instead of `portal/visitas/{id}`.
 - **Mobile-first layout:** `layouts/app.php` rebuilt mobile-first — sticky topbar collapses to a
   CSS-only hamburger (`#navtoggle` checkbox → `.mainnav`), `.bar-right` cluster (tenant selector,
   bell, user menu with email→👤 glyph on phones), inputs at 16px (no iOS zoom), 42px tap targets,

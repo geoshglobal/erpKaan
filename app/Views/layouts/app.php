@@ -71,6 +71,15 @@
 
         .cards-list { display:flex; flex-direction:column; gap:.75rem; }
         .list-card { padding:.9rem 1rem; }
+        .pager { display:flex; flex-wrap:wrap; gap:.3rem; justify-content:center; margin-top:1rem; }
+        .pager .pg { min-width:38px; height:38px; display:inline-flex; align-items:center; justify-content:center; padding:0 .6rem; border:1px solid var(--line); border-radius:8px; background:#fff; color:#0f172a; text-decoration:none; font-size:.9rem; }
+        .pager .pg:hover { background:#f1f5f9; }
+        .pager .pg.active { background:var(--accent); color:#fff; border-color:var(--accent); font-weight:600; }
+        .filters { display:flex; flex-wrap:wrap; gap:.5rem; align-items:end; margin-bottom:1rem; }
+        .filters .field { margin:0; }
+        .tabs { display:flex; flex-wrap:wrap; gap:.35rem; margin-bottom:1rem; }
+        .tabs a { padding:.45rem .8rem; border-radius:999px; border:1px solid var(--line); background:#fff; color:#334155; text-decoration:none; font-size:.85rem; }
+        .tabs a.active { background:var(--accent); color:#fff; border-color:var(--accent); font-weight:600; }
 
         .card { background:#fff; border:1px solid var(--line); border-radius:12px; padding:1.1rem; }
         form.card { background:#fff; border:1px solid var(--line); border-radius:12px; padding:1.1rem; }
