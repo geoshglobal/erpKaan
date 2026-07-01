@@ -13,7 +13,7 @@ use App\Models\PersonaModel;
 class Notify
 {
     /** Notify the requester of an acceso about an event on it. */
-    public static function acceso(array $acceso, string $titulo, string $mensaje): void
+    public static function acceso(array $acceso, string $titulo, string $mensaje, ?string $url = null): void
     {
         $personaId = $acceso['solicitante_persona_id'] ?? null;
         if (! $personaId) {
@@ -33,6 +33,7 @@ class Notify
             'tipo'          => 'acceso',
             'titulo'        => $titulo,
             'mensaje'       => $mensaje,
+            'url'           => $url,
             'canal'         => 'in_app',
         ]);
     }

@@ -82,28 +82,15 @@ class Caseta extends BaseController
             $data['id_foto_path'] = $path;
         }
 
-        // Parking assignment for vehicles.
-        $needAuth = false;
-        $forced   = false;
+        // Parking for vehicles. Resident-spot authorization is resolved BEFORE
+        // check-in (solicitarCajon/forzarCajon or the resident's approval); here we
+        // only assign a free visitor spot if one was picked.
         if ($vehiculo) {
             $parking = new \App\Libraries\Parking();
             $cajonId = (int) $this->request->getPost('cajon_id');
-            $accion  = $this->request->getPost('cajon_accion');
             if ($cajonId && $parking->isFreeVisitorSpot((int) $this->activeCondominioId(), $cajonId)) {
                 $data['cajon_id']           = $cajonId;
                 $data['autorizacion_cajon'] = null;
-            } elseif ($accion === 'forzar') {
-                // Caseta already got verbal authorization by phone.
-                $cajon = (new \App\Models\CajonModel())
-                    ->where('condominio_id', $this->activeCondominioId())
-                    ->where('casa_id', $acceso['casa_id'])
-                    ->where('activo', 1)->first();
-                $data['autorizacion_cajon'] = 'autorizado';
-                $data['cajon_id']           = $cajon['id'] ?? null;
-                $forced                     = true;
-            } elseif ($accion === 'solicitar') {
-                $data['autorizacion_cajon'] = 'pendiente';
-                $needAuth                   = true;
             }
         }
 
@@ -112,36 +99,62 @@ class Caseta extends BaseController
         $nota = 'Entrada. Pax: ' . $data['pax_ingresaron']
             . ($vehiculo ? ', vehículo' . ($data['folio_corbatin'] ? ' folio ' . $data['folio_corbatin'] : '') : '')
             . ($sinId ? ', sin ID' : '')
-            . ($forced ? ', cajón del residente autorizado por teléfono' : '')
-            . ($needAuth ? ', autorización de cajón solicitada' : '');
+            . ($acceso['autorizacion_cajon'] ? ', cajón residente ' . $acceso['autorizacion_cajon'] : '');
         (new AccesoEventoModel())->log($id, 'ingresado', $acceso['estado'], auth()->id(), $nota);
 
         Notify::acceso(
             $acceso,
             'Tu visita llegó',
-            $acceso['nombre_visitante'] . ' ingresó al condominio' . ($vehiculo ? ' en vehículo' : '') . '.'
+            $acceso['nombre_visitante'] . ' ingresó al condominio' . ($vehiculo ? ' en vehículo' : '') . '.',
+            site_url('portal/visitas/' . $id)
         );
 
-        if ($needAuth) {
-            Notify::acceso(
-                $acceso,
-                'Autoriza el uso de tu cajón',
-                'No hay cajones de visita disponibles para ' . $acceso['nombre_visitante']
-                . '. Autoriza o rechaza el uso de tu cajón en “Mi portal → Autorizaciones”.'
-            );
-        } elseif ($forced) {
-            Notify::acceso(
-                $acceso,
-                'Se usó tu cajón',
-                'Se usó tu cajón para ' . $acceso['nombre_visitante'] . ' (autorizado por teléfono en caseta).'
-            );
+        return redirect()->to('accesos/' . $id)->with('success', 'Entrada registrada. ✅');
+    }
+
+    /** Pre-check-in: request the resident's authorization to use their parking spot. */
+    public function solicitarCajon(int $id): RedirectResponse
+    {
+        $acceso = $this->scoped($id);
+        if ($acceso === null) {
+            return redirect()->to('accesos')->with('error', 'Acceso no encontrado.');
         }
 
-        $msg = $needAuth ? 'Entrada registrada. Se solicitó autorización del residente para el cajón. ⏳'
-            : ($forced ? 'Entrada registrada. Cajón del residente autorizado por teléfono. ✅'
-                : 'Entrada registrada. ✅');
+        $this->model->update($id, ['autorizacion_cajon' => 'pendiente']);
+        Notify::acceso(
+            $acceso,
+            'Autoriza el uso de tu cajón',
+            'No hay cajones de visita disponibles para ' . $acceso['nombre_visitante']
+            . '. Autoriza o rechaza el uso de tu cajón.',
+            site_url('portal/autorizaciones')
+        );
 
-        return redirect()->to('accesos/' . $id)->with('success', $msg);
+        return redirect()->to('caseta/accesos/' . $id . '/checkin')
+            ->with('success', 'Solicitud enviada al residente. Espera su respuesta o fuérzala si ya lo confirmó por teléfono.');
+    }
+
+    /** Pre-check-in: caseta forces the authorization (already confirmed by phone). */
+    public function forzarCajon(int $id): RedirectResponse
+    {
+        $acceso = $this->scoped($id);
+        if ($acceso === null) {
+            return redirect()->to('accesos')->with('error', 'Acceso no encontrado.');
+        }
+
+        $cajon = (new \App\Models\CajonModel())
+            ->where('condominio_id', $this->activeCondominioId())
+            ->where('casa_id', $acceso['casa_id'])
+            ->where('activo', 1)->first();
+        $this->model->update($id, ['autorizacion_cajon' => 'autorizado', 'cajon_id' => $cajon['id'] ?? null]);
+        Notify::acceso(
+            $acceso,
+            'Se usó tu cajón',
+            'Se autorizó por teléfono el uso de tu cajón para ' . $acceso['nombre_visitante'] . '.',
+            site_url('portal/visitas/' . $id)
+        );
+
+        return redirect()->to('caseta/accesos/' . $id . '/checkin')
+            ->with('success', 'Autorización forzada (por teléfono). Ahora registra la entrada.');
     }
 
     public function checkout(int $id): RedirectResponse
@@ -157,7 +170,7 @@ class Caseta extends BaseController
         $this->model->update($id, ['estado' => 'finalizado', 'check_out_at' => date('Y-m-d H:i:s')]);
         (new AccesoEventoModel())->log($id, 'finalizado', 'ingresado', auth()->id(), 'Salida registrada en caseta');
 
-        Notify::acceso($acceso, 'Tu visita salió', $acceso['nombre_visitante'] . ' salió del condominio.');
+        Notify::acceso($acceso, 'Tu visita salió', $acceso['nombre_visitante'] . ' salió del condominio.', site_url('portal/visitas/' . $id));
 
         return redirect()->to('accesos/' . $id)->with('success', 'Salida registrada. 👋');
     }

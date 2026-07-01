@@ -15,7 +15,7 @@ class NotificacionModel extends Model
 
     protected $allowedFields = [
         'condominio_id', 'persona_id', 'user_id', 'acceso_id',
-        'tipo', 'titulo', 'mensaje', 'canal', 'leido_at',
+        'tipo', 'titulo', 'mensaje', 'url', 'canal', 'leido_at',
     ];
 
     /** Unread in-app notifications count for a user. */

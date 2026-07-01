@@ -52,13 +52,14 @@ $reg = (int) $acceso['num_personas'];
             ⚠️ Ingresan <strong>más personas</strong> de las registradas (<?= $reg ?>). Confírmalo con el residente (botones arriba).
         </div>
 
+        <?php $az = $acceso['autorizacion_cajon'] ?? null; ?>
         <div class="field">
             <label style="display:flex; gap:.5rem; align-items:center; font-weight:400;">
-                <input type="checkbox" name="ingreso_vehiculo" id="veh-check" value="1" style="width:auto;">
+                <input type="checkbox" name="ingreso_vehiculo" id="veh-check" value="1" style="width:auto;" <?= $az ? 'checked' : '' ?>>
                 Ingresa en vehículo
             </label>
         </div>
-        <div id="veh" style="display:none;">
+        <div id="veh" style="display:<?= $az ? 'block' : 'none' ?>;">
             <?php if (empty($acceso['permite_vehiculo'])): ?>
                 <div class="alert error" style="margin-bottom:.75rem;">⚠️ El residente <strong>no autorizó</strong> acceso en vehículo. Confírmalo antes de permitir el ingreso (botones arriba).</div>
             <?php endif; ?>
@@ -71,23 +72,39 @@ $reg = (int) $acceso['num_personas'];
 
             <div class="field">
                 <label>Cajón de estacionamiento</label>
-                <?php if ($cajonesLibres !== []): ?>
+                <?php if ($cajonesLibres !== [] && $az === null): ?>
                     <select name="cajon_id">
                         <?php foreach ($cajonesLibres as $c): ?>
                             <option value="<?= (int) $c['id'] ?>">Cajón de visita <?= esc($c['identificador']) ?></option>
                         <?php endforeach; ?>
                     </select>
                     <div class="muted" style="font-size:.78rem; margin-top:.25rem;"><?= count($cajonesLibres) ?> cajón(es) de visita disponible(s).</div>
+                <?php elseif ($az === 'autorizado'): ?>
+                    <div class="alert success" style="margin:0;">✅ Cajón del residente autorizado. Ya puedes registrar la entrada.</div>
+                <?php elseif ($az === 'pendiente'): ?>
+                    <div class="alert error" style="margin:0; background:#fefce8; color:#854d0e;">
+                        ⏳ Solicitud enviada. Esperando respuesta del residente.
+                        <div style="display:flex; gap:.5rem; flex-wrap:wrap; margin-top:.5rem;">
+                            <a class="btn secondary small" href="<?= site_url('caseta/accesos/' . $acceso['id'] . '/checkin') ?>">↻ Actualizar estado</a>
+                            <button type="submit" formaction="<?= site_url('caseta/accesos/' . $acceso['id'] . '/forzar-cajon') ?>" class="btn small">Autorizado por teléfono</button>
+                        </div>
+                    </div>
+                <?php elseif ($az === 'rechazado'): ?>
+                    <div class="alert error" style="margin:0;">
+                        ⛔ El residente rechazó el uso de su cajón.
+                        <div style="margin-top:.5rem;">
+                            <button type="submit" formaction="<?= site_url('caseta/accesos/' . $acceso['id'] . '/forzar-cajon') ?>" class="btn small">Autorizar por teléfono</button>
+                        </div>
+                    </div>
                 <?php else: ?>
                     <div class="alert error" style="margin:0;">
-                        <div style="margin-bottom:.5rem;">No hay cajones de visita disponibles. Para usar el cajón del residente:</div>
+                        <div style="margin-bottom:.5rem;">No hay cajones de visita disponibles. Solicita el cajón del residente <strong>(esto no registra la entrada todavía)</strong>:</div>
                         <div style="display:flex; gap:.5rem; flex-wrap:wrap;">
-                            <button type="submit" name="cajon_accion" value="solicitar" class="btn secondary">Solicitar al residente</button>
-                            <button type="submit" name="cajon_accion" value="forzar" class="btn">Autorizado por teléfono</button>
+                            <button type="submit" formaction="<?= site_url('caseta/accesos/' . $acceso['id'] . '/solicitar-cajon') ?>" class="btn secondary">Solicitar al residente</button>
+                            <button type="submit" formaction="<?= site_url('caseta/accesos/' . $acceso['id'] . '/forzar-cajon') ?>" class="btn">Autorizado por teléfono</button>
                         </div>
                         <div class="muted" style="font-size:.78rem; margin-top:.45rem;">
-                            <strong>Solicitar</strong>: registra la entrada y deja la autorización pendiente (el residente responde en su portal).
-                            <strong>Autorizado por teléfono</strong>: úsalo solo si ya llamaste y confirmó.
+                            El residente recibe la notificación y responde en su portal. Cuando esté autorizado, registra la entrada con el botón de abajo.
                         </div>
                     </div>
                 <?php endif; ?>

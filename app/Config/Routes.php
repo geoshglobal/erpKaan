@@ -50,6 +50,8 @@ $routes->group('', ['filter' => 'session'], static function (RouteCollection $ro
         $routes->get('escaner', 'Caseta::escaner');
         $routes->get('accesos/(:num)/checkin', 'Caseta::checkinForm/$1');
         $routes->post('accesos/(:num)/checkin', 'Caseta::checkin/$1');
+        $routes->post('accesos/(:num)/solicitar-cajon', 'Caseta::solicitarCajon/$1');
+        $routes->post('accesos/(:num)/forzar-cajon', 'Caseta::forzarCajon/$1');
         $routes->post('accesos/(:num)/checkout', 'Caseta::checkout/$1');
     });
 
