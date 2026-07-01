@@ -277,6 +277,27 @@ Original request (2026-06-30):
    so the operator captures directly on desktop/tablet without browsing for a file (falls back
    to the file picker where the camera isn't available; needs localhost/HTTPS).
 
+### F2 planned — Events (guest list + event QR) (NOT built)
+
+Requested 2026-07-01. A resident hosts an event and manages a **guest list**; instead of one
+QR per guest, the event has a **single shared event QR**.
+- **Pax limit:** set as a condominio-config default AND/OR per-event by admin at creation
+  (per-event overrides the condo default).
+- **Data (proposed):** `eventos` (condominio_id, casa_id, anfitrion_persona_id, nombre,
+  fecha/rango, `qr_token` unique, `pax_limite`, `pax_ingresados` counter, estado) +
+  `evento_invitados` (evento_id, nombre, `pax` registered, `pax_ingresados`).
+- **Flow:** resident submits the guest list (each guest has a registered pax count) and shares
+  the one event QR. At caseta, scanning the event QR shows the event + guest list; caseta
+  registers arrivals, incrementing `pax_ingresados` (per guest and total). When total reaches
+  `pax_limite`, **notify the resident** that the limit was reached. Reuses the accesos +
+  notifications infrastructure; complements individual visits (this is a group/event access).
+
+### F2.4 email channel — config note
+
+`.env` already carries `mail.*` (outgoing `kaan.geoshglobal.com:465`, protocol smtp/SSL,
+`mail.username`/`mail.password`). When building the email notification channel, map these to
+CI4 `Config\Email` (SMTP, SSL on 465) and mirror in-app notifications to email.
+
 **Sub-steps:** F2.0 resident accounts (prereq — residents need Shield logins linked to
 personas) → F2.1 accesos model + resident visit + QR → F2.2 caseta panel (scan/validate,
 check-in/out, status) → F2.3 paquetería + delivery → F2.4 notifications (in-app→email→push)
