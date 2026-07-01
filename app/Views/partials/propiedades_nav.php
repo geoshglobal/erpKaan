@@ -11,7 +11,7 @@ $tabs = [
     <?php foreach ($tabs as $key => [$label, $url]): ?>
         <a href="<?= $url ?>"
            style="text-decoration:none; padding:.35rem .8rem; border-radius:8px; font-size:.88rem;
-                  <?= $current === $key ? 'background:#0d9488; color:#fff; font-weight:600;' : 'color:#334155;' ?>">
+                  <?= $current === $key ? 'background:#2C6E52; color:#fff; font-weight:600;' : 'color:#3a4a41;' ?>">
             <?= esc($label) ?>
         </a>
     <?php endforeach; ?>

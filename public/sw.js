@@ -7,8 +7,8 @@ self.addEventListener('push', function (event) {
     var title = data.title || 'Kaan';
     var options = {
         body: data.body || '',
-        icon: '/uploads/app-icon-192.png',
-        badge: '/uploads/app-badge.png',
+        icon: '/brand/png/erpKaan-isotipo-256.png',
+        badge: '/brand/png/erpKaan-isotipo-64.png',
         data: { url: data.url || '/notificaciones' },
         tag: data.tag || undefined,
         renotify: !! data.tag

@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 96" width="340" height="96" role="img" aria-label="erpKaan logotipo horizontal">
+  <defs>
+    <linearGradient id="ek-green" x1="10" y1="6" x2="86" y2="90" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2C6E52"></stop>
+      <stop offset="1" stop-color="#43A074"></stop>
+    </linearGradient>
+    
+  </defs>
+  
+  <rect x="6" y="6" width="84" height="84" rx="22" fill="url(#ek-green)"></rect>
+  <rect x="24.5" y="15.5" width="11" height="11" rx="3" fill="#F6F4ED"></rect>
+  <rect x="42.5" y="15.5" width="11" height="11" rx="3" fill="#F1D492"></rect>
+  <rect x="60.5" y="15.5" width="11" height="11" rx="3" fill="#F6F4ED"></rect>
+  <rect x="24.5" y="33.5" width="11" height="11" rx="3" fill="#F6F4ED"></rect>
+  <rect x="42.5" y="33.5" width="11" height="11" rx="3" fill="#F6F4ED"></rect>
+  <rect x="60.5" y="33.5" width="11" height="11" rx="3" fill="#F1D492"></rect>
+  <rect x="24.5" y="51.5" width="11" height="11" rx="3" fill="#F6F4ED"></rect>
+  <rect x="42.5" y="51.5" width="11" height="11" rx="3" fill="#F6F4ED"></rect>
+  <rect x="60.5" y="51.5" width="11" height="11" rx="3" fill="#F6F4ED"></rect>
+  <rect x="24.5" y="69.5" width="11" height="11" rx="3" fill="#F6F4ED"></rect>
+  <rect x="42.5" y="69.5" width="11" height="11" rx="3" fill="#F6F4ED"></rect>
+  <rect x="60.5" y="69.5" width="11" height="11" rx="3" fill="#F6F4ED"></rect>
+  
+  <text x="108" y="65" class="wm">
+    <tspan font-weight="600" fill="#7A8A7F">erp</tspan><tspan font-weight="800" fill="#2C6E52">Kaan</tspan>
+  </text>
+</svg>

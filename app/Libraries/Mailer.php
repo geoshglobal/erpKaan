@@ -84,20 +84,24 @@ class Mailer
         if ($url) {
             $label = esc($ctaLabel ?? 'Ver detalle');
             $cta   = '<p style="margin:1.5rem 0 0;"><a href="' . esc($url, 'attr') . '"'
-                . ' style="display:inline-block; background:#0d9488; color:#fff; text-decoration:none;'
-                . ' padding:.6rem 1.2rem; border-radius:8px; font-weight:600;">' . $label . '</a></p>';
+                . ' style="display:inline-block; background:#2C6E52; color:#fff; text-decoration:none;'
+                . ' padding:.6rem 1.2rem; border-radius:8px; font-weight:700;">' . $label . '</a></p>';
         }
 
-        return '<!doctype html><html lang="es"><body style="margin:0; background:#f1f5f9; font-family:'
-            . '-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif; color:#0f172a;">'
+        $logo = esc(site_url('brand/png/erpKaan-isotipo-64.png'), 'attr');
+
+        return '<!doctype html><html lang="es"><body style="margin:0; background:#F6F4ED; font-family:'
+            . '-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif; color:#1C2621;">'
             . '<div style="max-width:520px; margin:0 auto; padding:1.5rem;">'
-            . '<div style="background:#fff; border-radius:12px; padding:1.5rem 1.6rem; border:1px solid #e2e8f0;">'
-            . '<div style="font-weight:700; color:#0d9488; font-size:1.05rem; margin-bottom:.75rem;">Kaan</div>'
-            . '<h1 style="font-size:1.15rem; margin:0 0 .6rem;">' . $safeTitulo . '</h1>'
-            . '<div style="font-size:.95rem; line-height:1.5; color:#334155;">' . $safeMensaje . '</div>'
+            . '<div style="background:#fff; border-radius:14px; padding:1.5rem 1.6rem; border:1px solid #dbe5de;">'
+            . '<div style="display:flex; align-items:center; gap:.5rem; margin-bottom:.9rem;">'
+            . '<img src="' . $logo . '" alt="" width="28" height="28" style="border-radius:7px;">'
+            . '<span style="font-weight:800; color:#2C6E52; font-size:1.05rem;">erpKaan</span></div>'
+            . '<h1 style="font-size:1.15rem; margin:0 0 .6rem; color:#1C2621;">' . $safeTitulo . '</h1>'
+            . '<div style="font-size:.95rem; line-height:1.5; color:#3a4a41;">' . $safeMensaje . '</div>'
             . $cta
             . '</div>'
-            . '<p style="text-align:center; color:#94a3b8; font-size:.75rem; margin-top:1rem;">'
+            . '<p style="text-align:center; color:#6b7a70; font-size:.75rem; margin-top:1rem;">'
             . 'Este es un mensaje automático de la administración de tu condominio.</p>'
             . '</div></body></html>';
     }

@@ -196,6 +196,21 @@ Implications for all code and schema work:
 - **Personas roadmap:** step 1 base ✅ · step 2 owners↔casas ✅ · step 3 occupancy ✅.
   **F1 (Auth + Propiedades + Personas) complete.**
 
+## Branding (erpKaan — manual de marca)
+
+Brand kit lives in `public/brand/` (svg/png logos, favicon, `README.txt` with the palette; the
+`*.html` manual is git-ignored, not deployed). Palette: **Verde profundo `#2C6E52`** (primary),
+**Verde medio `#43A074`** (highlights/active), **Acento arena `#F1D492`**, **Tinta `#1C2621`**
+(topbar/ink), **Verde tinte `#E4F0E9`**, **Crema `#F6F4ED`** (page bg). Fonts: **Plus Jakarta Sans**
+(600/700/800, UI) + **Space Mono** (`.mono`, codes) via Google Fonts.
+
+Applied in `layouts/app.php` (CSS vars `--accent/--accent2/--sand/--tint/--cream/--ink`, reversed
+logo in the topbar, favicon + apple-touch-icon + `manifest.webmanifest`, `theme-color`). Auth pages
+(Shield) themed via `Config\Auth::$views['layout'] = 'auth/layout'` → `app/Views/auth/layout.php`
+(Bootstrap kept for the forms, brand overrides + horizontal logo). Emails (`Mailer::layout`) and the
+push icons (`public/sw.js`, `manifest.webmanifest`) use the brand green + isotipo PNGs. When adding
+views, use the CSS vars / `.mono` — avoid hardcoded hex.
+
 ## F2 — Access control (planned)
 
 Residents create access requests (visita w/ QR, paquetería, delivery); caseta validates

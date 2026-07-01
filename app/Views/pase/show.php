@@ -7,7 +7,7 @@
     <?= $this->include('partials/pase_card', ['acceso' => $acceso, 'casaIdent' => $casaIdent, 'passUrl' => $passUrl]) ?>
 
     <?php if (! empty($canOperate)): ?>
-        <div class="card" style="margin-top:1rem; text-align:center; border-color:#0d9488;">
+        <div class="card" style="margin-top:1rem; text-align:center; border-color:#2C6E52;">
             <div class="muted" style="font-size:.82rem; margin-bottom:.25rem;">Caseta</div>
             <?= $this->include('partials/caseta_actions', ['acceso' => $acceso]) ?>
         </div>
