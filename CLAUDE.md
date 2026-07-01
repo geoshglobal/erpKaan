@@ -441,6 +441,25 @@ Requested 2026-07-01. So caseta can **grant pedestrian (on-foot) access to resid
 Todo tenant-scoped, soft deletes, y del lado de caseta principalmente **consulta** (verificación de
 identidad para el acceso peatonal), con el alta/gestión desde propiedades o el portal del residente.
 
+### F2/F3 planned — Bloqueos por morosidad (configurable por condominio) (NOT built)
+
+Requested 2026-07-01. Cruza F2 (acceso) con F3 (finanzas). Cuando una casa/persona está en
+**morosidad** (adeudo de mantenimiento/cuotas), el condominio puede:
+1. **Bloquear solicitudes** del residente (visitas, deliveries/proveedores, reservas de amenidades,
+   etc.) — total o por tipo.
+2. **Alertar a caseta** cuando llega un acceso ligado a una casa morosa ("⚠️ esta casa tiene adeudo"),
+   sin necesariamente impedir el paso (configurable: alertar vs restringir).
+3. **Restricciones de solicitudes** graduales (p. ej. permitir visitas pero no reservas; o solo avisar).
+
+**Todo configurable por condominio** (como los horarios): un bloque de config en `condominios`
+(p. ej. `morosidad_config` JSON: activo, umbral de días/monto, qué se bloquea, alertar-vs-bloquear).
+Depende de tener el estado de cuenta/morosidad de F3; hasta entonces se puede modelar el flag de
+"casa morosa" y la config, y conectarlo cuando F3 exista. Enforcement en los puntos de creación de
+solicitudes (Visitas/avisos/amenidades) + alerta en el panel/checkin de caseta.
+
+> **El roadmap completo (hecho vs pendiente) vive en [`PLAN.md`](PLAN.md)** — úsalo para retomar
+> desde un chat nuevo con poco contexto.
+
 ### F2.4 email channel — config note
 
 `.env` already carries `mail.*` (outgoing `kaan.geoshglobal.com:465`, protocol smtp/SSL,
