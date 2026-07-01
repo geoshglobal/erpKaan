@@ -86,11 +86,21 @@ Code never switches groups. `.env` is git-ignored — never commit credentials.
 | Environment   | Privileges                                  |
 |---------------|---------------------------------------------|
 | development   | Full / universal (CREATE, ALTER, DROP, DELETE, etc.) |
-| **production**| **Only `SELECT`, `INSERT`, `UPDATE`**       |
+| **production**| **`SELECT`, `INSERT`, `UPDATE`** on all tables + **`DELETE` on `auth_*` only** |
 
-Production has **no `DELETE` and no DDL** (`CREATE`/`ALTER`/`DROP`). Implications for all code and schema work:
+Production has **no DDL** (`CREATE`/`ALTER`/`DROP`) and **no `DELETE` on domain tables**.
 
-- **No hard deletes in prod.** Use **soft deletes** (CI4 Model `$useSoftDeletes = true`, `deleted_at` column). A soft delete is an `UPDATE`, so it works under prod privileges. Never call raw `DELETE`/`->delete()` paths that hit prod.
+> **Shield exception (granted 2026-07-01):** the prod user (`cycoasis_kaanAdmin`) has
+> `DELETE` on the Shield housekeeping tables — `auth_remember_tokens`, `auth_identities`,
+> `auth_groups_users`, `auth_permissions_users` — because the framework hard-deletes ephemeral
+> security rows (logout purges remember tokens; role/permission changes remove rows). This does
+> NOT relax the domain rule: **domain tables still never get DELETE — soft deletes only.** The
+> logout `DELETE` error (`auth_remember_tokens`) was the trigger; Shield's `Session::logout()`
+> always calls `purgeRememberTokens()`, even with remember-me off.
+
+Implications for all code and schema work:
+
+- **No hard deletes on domain tables in prod.** Use **soft deletes** (CI4 Model `$useSoftDeletes = true`, `deleted_at` column). A soft delete is an `UPDATE`, so it works under prod privileges. Never call raw `DELETE`/`->delete()` paths on domain tables in prod (Shield's own `auth_*` deletes are fine — see the exception above).
 - **Migrations cannot run in production.** `php spark migrate` needs DDL. Schema changes are authored as migrations and run in **development only**; in prod they must be applied manually by a DBA with elevated privileges (or via a separate deploy step). Don't assume `spark migrate` runs on the prod box.
 - Design every feature assuming prod can only read, add rows, and update rows. Anything that would need DELETE/DDL at runtime must be reworked.
 
@@ -269,6 +279,67 @@ notifications = **in-app → email → push** · visits = **immediate AND schedu
   `Notification.permission !== 'granted'`; explains blocked state; session-dismissible).
   Verified: prefs round-trip (save→persist), banner render, sw.js/push.js served. **F2.4 done
   (email + push + prefs).** Remaining F2: F2.3 paquetería/delivery, F2.5 guest access.
+- **F2.3 paquetería + delivery done:** caseta "Registro directo" (`caseta/registro`) for
+  arrivals no resident pre-registered — `tipo` paquetería|delivery|proveedor. Paquetería →
+  estado `en_caseta` (stays at the gate) → `Caseta::entregar` marks `entregado`; delivery/
+  proveedor → `ingresado` now (walk-in) → existing checkout → `finalizado`. New estados
+  `en_caseta`/`entregado` + `AccesoModel::TIPOS` const. Recipient resolved via
+  `App\Libraries\CasaResidents` (owners + vigente occupants, principal first; caseta picks from
+  a per-casa JSON map, else default). Notifies the resident (in-app+email+push). Resident sees
+  them at `portal/paquetes` (`Visitas::paquetes`, tipo-filtered); `Visitas::index` now
+  visita-only. `caseta_actions` partial + accesos list/detail updated for the new estados.
+- **Parking pre-authorization (visit creation):** `accesos.autoriza_cajon_propio` (bool). On the
+  resident's new-visit form, checking "permitir vehículo" reveals "autorizo el uso de mi cajón
+  si no hay lugar de visitas". At caseta check-in, when no visitor spot is free AND the resident
+  pre-authorized, their own cajon is assigned automatically (`autorizacion_cajon='autorizado'`)
+  with no gate request — the solicitar/forzar flow only shows when NOT pre-authorized.
+  `Caseta::residentCajonId()` helper (forzarCajon refactored onto it). Check-in auto-opens the
+  vehicle section when `permite_vehiculo`.
+- **Notification URL fix:** callers now pass RELATIVE paths to `Notify::acceso`; `Notify::absUrl()`
+  (idempotent: absolute→as-is, relative→site_url) is applied once at each sink (in-app view,
+  email, push). Fixes the doubled `.../https:/.../` link seen in prod.
+- **Resident announces delivery/proveedor (F2.3+):** residents pre-announce an expected
+  `delivery` or `proveedor` from `portal/avisos/nuevo` (`Visitas::avisar`/`crearAviso`, estado
+  `programado`) so caseta grants access smoothly; **caseta is notified** via `Notify::caseta()`
+  (in-app+push to condominio users in the Shield `caseta` group, resolved through
+  `condominio_usuarios`). The vehicle/parking sub-section (permite_vehiculo + autoriza_cajon_propio)
+  shows **only for proveedor**, never delivery. Appears in `portal/paquetes` and the caseta panel.
+- **Configurable access schedules per condominio (per-day):** `condominios.horarios` (JSON) holds a
+  SEPARATE window per weekday for delivery and proveedor: `{"delivery":{"activo":true,
+  "dias":{"1":{"desde":"09:00","hasta":"18:00"}, ...}}}`. `App\Libraries\Horario` (forTipo/check/
+  resumen) evaluates in the condominio's timezone. Admin sets it in the condominio form (per-day
+  rows). Residents see the allowed window when announcing and are **blocked** if the arrival time is
+  outside it (restriction); caseta sees an **alert** (not blocked) at check-in and registro.
+- **Timezone (fixes GMT-0):** datetimes stored UTC, displayed in a resolved zone —
+  user preference → active condominio (`condominios.timezone`) → app default `America/Mexico_City`.
+  `App\Libraries\Tz` + global `dt()` helper (autoloaded via BaseController `$helpers=['kaan']`),
+  applied across the access views. Condominio form sets its zone; users override in
+  `notificaciones/preferencias`. `Visitas::vigencia/parseDateTime` now tz-aware (datetime-local
+  inputs interpreted in the user's zone → UTC; "hoy" = end of day in the user's zone).
+- **Reusable camera capture:** `partials/camera_capture` + `public/js/camera.js` add a live
+  "📷 Tomar foto" button (getUserMedia → canvas → sets the file input, independent of the file
+  picker) to any caseta photo field — used in `caseta/registro` and the new deliver-photo form.
+- **Mark-delivered captures a photo:** `Caseta::entregarForm` (GET) → `caseta/entregar` view with
+  file+camera → `entregar` (POST) stores `accesos.foto_entrega_path` as proof, then notifies.
+- **Pagination + accesos search/filters:** transactional listings paginate (CI4 `paginate()` +
+  a custom `partials/pager` template registered as `kaan` in `Config\Pager`): accesos (20/pg),
+  visitas + paquetes (15/pg), notificaciones (20/pg). The **accesos supervision panel** (used by
+  superadmin/caseta) gained **tipo tabs** (Todos/Visita/Delivery/Proveedor/Paquetería) and a
+  **filter form**: by **departamento (casa)** + free-text (visitor/casa/empresa) + estado — so
+  caseta can find a pass by department when NOT scanning the QR. `AccesoModel::scopeForCondominio`
+  / `scopeForSolicitante` build filtered queries; `$pager->only([...])` preserves filters across
+  pages. **Date-range filter (default last 15 days)** on accesos, visitas, paquetes and
+  notificaciones via `BaseController::dateRange()` (tz-aware local→UTC boundaries on `created_at`,
+  `Tz::boundary`/`Tz::localDate`) + reusable `partials/date_filter`.
+- **Delivery/proveedor notifications are tipo-specific:** caseta check-in/out and cajón messages
+  now say "Tu delivery/proveedor llegó/salió" (not "visita") and link non-visita accesos to
+  `portal/paquetes` instead of `portal/visitas/{id}`.
+- **Mobile-first layout:** `layouts/app.php` rebuilt mobile-first — sticky topbar collapses to a
+  CSS-only hamburger (`#navtoggle` checkbox → `.mainnav`), `.bar-right` cluster (tenant selector,
+  bell, user menu with email→👤 glyph on phones), inputs at 16px (no iOS zoom), 42px tap targets,
+  `.grid2` stacks, wide `table.grid` scrolls horizontally on phones, desktop enhancements behind
+  `@media (min-width:768px)`. New shared components: `.segmented`, `.head-actions`, `.cards-list`.
+  Verified: all pages 200, hamburger/nav/bar-right present, registro form + paquetes render.
 
 ### F2 backlog — visitor vehicle access + parking (DONE 2026-07-01)
 
@@ -315,6 +386,18 @@ QR per guest, the event has a **single shared event QR**.
   registers arrivals, incrementing `pax_ingresados` (per guest and total). When total reaches
   `pax_limite`, **notify the resident** that the limit was reached. Reuses the accesos +
   notifications infrastructure; complements individual visits (this is a group/event access).
+
+### F2 planned — Personal de servicio por vivienda (NOT built)
+
+Requested 2026-07-01. A resident registers recurring **household service staff** (empleada,
+jardinero, niñera, etc.) tied to their casa, with a **work schedule** so caseta can grant access
+routinely. **No QR and no phone required** — many staff don't have a phone; caseta identifies them
+by **presenting an ID** (name + photo on file). Proposed data: `personal_servicio` (condominio_id,
+casa_id, persona/nombre, foto_path, tipo/rol, activo, notas) + a per-weekday schedule (reuse the
+`Horario` per-day windows shape). Caseta panel: search staff by casa/name, verify the photo/ID,
+register entry/exit (reuse the accesos check-in/out + `acceso_eventos`), with an out-of-schedule
+alert like delivery/proveedor. Resident manages their casa's staff from the portal. Complements
+individual visits and the delivery/proveedor announce flow.
 
 ### F2.4 email channel — config note
 

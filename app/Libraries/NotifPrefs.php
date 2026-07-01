@@ -34,13 +34,27 @@ class NotifPrefs
         return (bool) service('settings')->get('Notificaciones.push', self::ctx($userId));
     }
 
-    /** @return array{email: bool, push: bool} */
-    public static function all(int $userId): array
+    /** User's preferred timezone, or '' to inherit the condominio's. */
+    public static function timezone(int $userId): string
     {
-        return ['email' => self::email($userId), 'push' => self::push($userId)];
+        if ($userId <= 0) {
+            return '';
+        }
+
+        return (string) service('settings')->get('Notificaciones.timezone', self::ctx($userId));
     }
 
-    public static function save(int $userId, bool $email, bool $push): void
+    /** @return array{email: bool, push: bool, timezone: string} */
+    public static function all(int $userId): array
+    {
+        return [
+            'email'    => self::email($userId),
+            'push'     => self::push($userId),
+            'timezone' => self::timezone($userId),
+        ];
+    }
+
+    public static function save(int $userId, bool $email, bool $push, string $timezone = ''): void
     {
         if ($userId <= 0) {
             return;
@@ -48,5 +62,6 @@ class NotifPrefs
         $settings = service('settings');
         $settings->set('Notificaciones.email', $email, self::ctx($userId));
         $settings->set('Notificaciones.push', $push, self::ctx($userId));
+        $settings->set('Notificaciones.timezone', $timezone, self::ctx($userId));
     }
 }

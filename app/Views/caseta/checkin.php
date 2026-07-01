@@ -35,6 +35,13 @@ $reg = (int) $acceso['num_personas'];
     </div>
 <?php endif; ?>
 
+<?php if (! empty($horario) && $horario['enforced'] && ! $horario['permitido']): ?>
+    <div class="alert error" style="border:1px solid #fca5a5;">
+        ⛔ <strong>Fuera de horario.</strong> <?= esc(AccesoModel::TIPOS[$acceso['tipo']] ?? $acceso['tipo']) ?> permitido: <?= esc($horario['resumen']) ?>.
+        Verifica con la administración antes de dar acceso.
+    </div>
+<?php endif; ?>
+
 <form class="card" method="post" action="<?= site_url('caseta/accesos/' . $acceso['id'] . '/checkin') ?>" enctype="multipart/form-data">
     <?= csrf_field() ?>
 
@@ -53,13 +60,14 @@ $reg = (int) $acceso['num_personas'];
         </div>
 
         <?php $az = $acceso['autorizacion_cajon'] ?? null; ?>
+        <?php $vehOpen = $az || ! empty($acceso['permite_vehiculo']); ?>
         <div class="field">
             <label style="display:flex; gap:.5rem; align-items:center; font-weight:400;">
-                <input type="checkbox" name="ingreso_vehiculo" id="veh-check" value="1" style="width:auto;" <?= $az ? 'checked' : '' ?>>
+                <input type="checkbox" name="ingreso_vehiculo" id="veh-check" value="1" style="width:auto;" <?= $vehOpen ? 'checked' : '' ?>>
                 Ingresa en vehículo
             </label>
         </div>
-        <div id="veh" style="display:<?= $az ? 'block' : 'none' ?>;">
+        <div id="veh" style="display:<?= $vehOpen ? 'block' : 'none' ?>;">
             <?php if (empty($acceso['permite_vehiculo'])): ?>
                 <div class="alert error" style="margin-bottom:.75rem;">⚠️ El residente <strong>no autorizó</strong> acceso en vehículo. Confírmalo antes de permitir el ingreso (botones arriba).</div>
             <?php endif; ?>
@@ -96,9 +104,13 @@ $reg = (int) $acceso['num_personas'];
                             <button type="submit" formaction="<?= site_url('caseta/accesos/' . $acceso['id'] . '/forzar-cajon') ?>" class="btn small">Autorizar por teléfono</button>
                         </div>
                     </div>
+                <?php elseif (! empty($acceso['autoriza_cajon_propio'])): ?>
+                    <div class="alert success" style="margin:0;">
+                        ✅ El residente <strong>pre-autorizó</strong> el uso de su cajón (no hay lugar de visitas configurado). Ya puedes registrar la entrada; se asignará su cajón automáticamente.
+                    </div>
                 <?php else: ?>
                     <div class="alert error" style="margin:0;">
-                        <div style="margin-bottom:.5rem;">No hay cajones de visita disponibles. Solicita el cajón del residente <strong>(esto no registra la entrada todavía)</strong>:</div>
+                        <div style="margin-bottom:.5rem;">No hay cajones de visita disponibles y el residente <strong>no pre-autorizó</strong> el suyo. Solicítalo <strong>(esto no registra la entrada todavía)</strong>:</div>
                         <div style="display:flex; gap:.5rem; flex-wrap:wrap;">
                             <button type="submit" formaction="<?= site_url('caseta/accesos/' . $acceso['id'] . '/solicitar-cajon') ?>" class="btn secondary">Solicitar al residente</button>
                             <button type="submit" formaction="<?= site_url('caseta/accesos/' . $acceso['id'] . '/forzar-cajon') ?>" class="btn">Autorizado por teléfono</button>

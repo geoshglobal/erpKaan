@@ -42,8 +42,16 @@
         </div>
         <div class="field">
             <label style="display:flex; gap:.5rem; align-items:center; font-weight:400;">
-                <input type="checkbox" name="permite_vehiculo" value="1" <?= old('permite_vehiculo') ? 'checked' : '' ?> style="width:auto;">
+                <input type="checkbox" name="permite_vehiculo" id="veh-perm" value="1" <?= old('permite_vehiculo') ? 'checked' : '' ?> style="width:auto;">
                 Permitir acceso en vehículo
+            </label>
+        </div>
+        <div class="field" id="cajon-propio" style="display:<?= old('permite_vehiculo') ? 'block' : 'none' ?>; margin-left:1.6rem;">
+            <label style="display:flex; gap:.5rem; align-items:flex-start; font-weight:400;">
+                <input type="checkbox" name="autoriza_cajon_propio" value="1" <?= old('autoriza_cajon_propio') ? 'checked' : '' ?> style="width:auto; margin-top:.25rem;">
+                <span>Autorizo el uso de <strong>mi cajón</strong> si no hay lugar de visitas disponible
+                    <span class="muted" style="display:block; font-size:.8rem; font-weight:400;">Si el condominio no tiene cajones de visita, tu visita usará tu cajón sin pedirte autorización en el momento.</span>
+                </span>
             </label>
         </div>
     </fieldset>
@@ -75,4 +83,16 @@
     </div>
 </form>
 
+<?= $this->endSection() ?>
+
+<?= $this->section('scripts') ?>
+<script>
+(function () {
+    var perm = document.getElementById('veh-perm');
+    var box = document.getElementById('cajon-propio');
+    if (perm && box) {
+        perm.addEventListener('change', function () { box.style.display = this.checked ? 'block' : 'none'; });
+    }
+})();
+</script>
 <?= $this->endSection() ?>

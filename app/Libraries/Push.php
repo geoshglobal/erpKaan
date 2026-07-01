@@ -53,7 +53,7 @@ class Push
         $payload = json_encode([
             'title' => $titulo,
             'body'  => $mensaje,
-            'url'   => $url ? site_url($url) : site_url('notificaciones'),
+            'url'   => Notify::absUrl($url) ?? site_url('notificaciones'),
         ], JSON_UNESCAPED_UNICODE);
 
         try {

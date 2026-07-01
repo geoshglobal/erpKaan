@@ -113,7 +113,32 @@ class Condominios extends BaseController
             'cp_fiscal'      => $this->request->getPost('cp_fiscal'),
             'latitud'        => $this->request->getPost('latitud') ?: null,
             'longitud'       => $this->request->getPost('longitud') ?: null,
+            'horarios'       => $this->horariosPayload(),
+            'timezone'       => $this->request->getPost('timezone') ?: \App\Libraries\Tz::DEFAULT,
             'activo'         => (int) ($this->request->getPost('activo') ?? 1),
         ];
+    }
+
+    /** Build the delivery/proveedor per-weekday schedule JSON from posted fields. */
+    private function horariosPayload(): string
+    {
+        $out = [];
+        foreach (\App\Libraries\Horario::TIPOS as $tipo) {
+            $dias = [];
+            for ($d = 0; $d < 7; $d++) {
+                if ($this->request->getPost("horario_{$tipo}_dia_{$d}_activo")) {
+                    $dias[(string) $d] = [
+                        'desde' => $this->request->getPost("horario_{$tipo}_dia_{$d}_desde") ?: '00:00',
+                        'hasta' => $this->request->getPost("horario_{$tipo}_dia_{$d}_hasta") ?: '23:59',
+                    ];
+                }
+            }
+            $out[$tipo] = [
+                'activo' => (bool) $this->request->getPost("horario_{$tipo}_activo"),
+                'dias'   => $dias,
+            ];
+        }
+
+        return json_encode($out, JSON_UNESCAPED_UNICODE);
     }
 }

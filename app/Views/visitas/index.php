@@ -10,12 +10,14 @@
 </div>
 
 
+<?= $this->include('partials/date_filter', ['range' => $range, 'action' => site_url('portal/visitas')]) ?>
+
 <?php
 $pillClass = ['programado' => 'on', 'ingresado' => 'on', 'finalizado' => 'off', 'cancelado' => 'off', 'vencido' => 'off'];
 ?>
 
 <?php if ($visitas === []): ?>
-    <p class="muted">Aún no has registrado visitas.</p>
+    <p class="muted">No tienes visitas en este rango.</p>
 <?php else: ?>
     <table class="grid">
         <thead>
@@ -53,6 +55,7 @@ $pillClass = ['programado' => 'on', 'ingresado' => 'on', 'finalizado' => 'off', 
             <?php endforeach; ?>
         </tbody>
     </table>
+    <?= $pager->links('default', 'kaan') ?>
 <?php endif; ?>
 
 <?= $this->endSection() ?>

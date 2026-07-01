@@ -38,6 +38,20 @@
         </label>
     </fieldset>
 
+    <fieldset>
+        <legend>Zona horaria</legend>
+        <div class="field">
+            <label>Mostrar fechas y horas en</label>
+            <select name="timezone">
+                <option value="">— Usar la del condominio (<?= esc($condoTz) ?>) —</option>
+                <?php foreach ($zones as $z => $lbl): ?>
+                    <option value="<?= esc($z) ?>" <?= ($prefs['timezone'] ?? '') === $z ? 'selected' : '' ?>><?= esc($lbl) ?></option>
+                <?php endforeach; ?>
+            </select>
+            <div class="muted" style="font-size:.8rem; margin-top:.25rem;">Por defecto se usa la zona horaria del condominio.</div>
+        </div>
+    </fieldset>
+
     <div class="form-actions">
         <button type="submit" class="btn">Guardar preferencias</button>
     </div>

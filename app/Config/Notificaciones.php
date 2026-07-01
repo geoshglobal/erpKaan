@@ -16,4 +16,7 @@ class Notificaciones extends BaseConfig
 
     /** Send Web Push notifications to the user's subscribed browsers. */
     public bool $push = true;
+
+    /** User's preferred display timezone; empty = inherit the condominio's. */
+    public string $timezone = '';
 }

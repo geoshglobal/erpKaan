@@ -14,9 +14,9 @@
     <?php $az = ['pendiente' => 'autorización pendiente', 'autorizado' => 'tu cajón autorizado', 'rechazado' => 'rechazado']; ?>
     <div class="card" style="max-width:420px; margin:1rem auto 0;">
         <h3 style="margin:0 0 .7rem; font-size:1rem;">Detalles del ingreso</h3>
-        <p style="margin:.3rem 0;"><span class="muted">🕒 Entró:</span> <strong><?= esc(date('d/m/Y H:i', strtotime($acceso['check_in_at']))) ?></strong></p>
+        <p style="margin:.3rem 0;"><span class="muted">🕒 Entró:</span> <strong><?= esc(dt($acceso['check_in_at'], 'd/m/Y H:i')) ?></strong></p>
         <?php if (! empty($acceso['check_out_at'])): ?>
-            <p style="margin:.3rem 0;"><span class="muted">🚪 Salió:</span> <strong><?= esc(date('d/m/Y H:i', strtotime($acceso['check_out_at']))) ?></strong></p>
+            <p style="margin:.3rem 0;"><span class="muted">🚪 Salió:</span> <strong><?= esc(dt($acceso['check_out_at'], 'd/m/Y H:i')) ?></strong></p>
         <?php endif; ?>
         <?php if ($acceso['pax_ingresaron'] !== null): ?>
             <p style="margin:.3rem 0;"><span class="muted">👥 Personas que ingresaron:</span> <strong><?= (int) $acceso['pax_ingresaron'] ?></strong>

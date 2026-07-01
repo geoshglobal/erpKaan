@@ -17,8 +17,8 @@ class AccesoModel extends Model
     protected $allowedFields = [
         'condominio_id', 'casa_id', 'tipo', 'solicitante_persona_id', 'creado_por_user_id',
         'nombre_visitante', 'empresa', 'telefono', 'num_personas', 'pax_ingresaron',
-        'placas', 'permite_vehiculo', 'ingreso_vehiculo', 'folio_corbatin', 'cajon_id',
-        'autorizacion_cajon', 'foto_path', 'id_foto_path', 'sin_id', 'id_nota',
+        'placas', 'permite_vehiculo', 'autoriza_cajon_propio', 'ingreso_vehiculo', 'folio_corbatin', 'cajon_id',
+        'autorizacion_cajon', 'foto_path', 'foto_entrega_path', 'id_foto_path', 'sin_id', 'id_nota',
         'qr_token', 'valido_desde', 'valido_hasta', 'estado',
         'check_in_at', 'check_out_at', 'caseta_user_id', 'notas',
     ];
@@ -37,8 +37,17 @@ class AccesoModel extends Model
         'programado' => 'Programado',
         'ingresado'  => 'Ingresó',
         'finalizado' => 'Finalizó',
+        'en_caseta'  => 'En caseta',
+        'entregado'  => 'Entregado',
         'cancelado'  => 'Cancelado',
         'vencido'    => 'Vencido',
+    ];
+
+    public const TIPOS = [
+        'visita'     => 'Visita',
+        'paqueteria' => 'Paquetería',
+        'delivery'   => 'Delivery',
+        'proveedor'  => 'Proveedor',
     ];
 
     public function byToken(string $token): ?array
@@ -49,23 +58,82 @@ class AccesoModel extends Model
     /** All accesos of a condominio with casa + requester name (supervision). @return list<array<string,mixed>> */
     public function forCondominio(int $condominioId): array
     {
-        return $this->select('accesos.*, casas.identificador AS casa_ident,
+        return $this->scopeForCondominio($condominioId, [])->findAll();
+    }
+
+    /**
+     * Supervision query with optional filters (for pagination). Returns $this so
+     * the caller can chain ->paginate($n).
+     *
+     * @param array{casa_id?:int,tipo?:string,estado?:string,q?:string} $filters
+     */
+    public function scopeForCondominio(int $condominioId, array $filters = []): self
+    {
+        $this->select('accesos.*, casas.identificador AS casa_ident,
                 TRIM(CONCAT(personas.nombre, " ", COALESCE(personas.apellido_paterno, ""))) AS solicitante')
             ->join('casas', 'casas.id = accesos.casa_id', 'left')
             ->join('personas', 'personas.id = accesos.solicitante_persona_id', 'left')
-            ->where('accesos.condominio_id', $condominioId)
-            ->orderBy('accesos.id', 'DESC')
-            ->findAll();
+            ->where('accesos.condominio_id', $condominioId);
+
+        if (! empty($filters['casa_id'])) {
+            $this->where('accesos.casa_id', (int) $filters['casa_id']);
+        }
+        if (! empty($filters['tipo']) && isset(self::TIPOS[$filters['tipo']])) {
+            $this->where('accesos.tipo', $filters['tipo']);
+        }
+        if (! empty($filters['estado'])) {
+            $this->where('accesos.estado', $filters['estado']);
+        }
+        if (! empty($filters['fecha_desde'])) {
+            $this->where('accesos.created_at >=', $filters['fecha_desde']);
+        }
+        if (! empty($filters['fecha_hasta'])) {
+            $this->where('accesos.created_at <=', $filters['fecha_hasta']);
+        }
+        if (! empty($filters['q'])) {
+            $q = trim((string) $filters['q']);
+            $this->groupStart()
+                ->like('accesos.nombre_visitante', $q)
+                ->orLike('casas.identificador', $q)
+                ->orLike('accesos.empresa', $q)
+                ->groupEnd();
+        }
+
+        return $this->orderBy('accesos.id', 'DESC');
     }
 
-    /** Visits requested by a persona (most recent first). @return list<array<string,mixed>> */
-    public function forSolicitante(int $personaId): array
+    /**
+     * Accesos requested for / addressed to a persona (most recent first),
+     * optionally filtered by tipo(s).
+     * @param list<string>|null $tipos
+     * @return list<array<string,mixed>>
+     */
+    public function forSolicitante(int $personaId, ?array $tipos = null): array
     {
-        return $this->select('accesos.*, casas.identificador AS casa_ident')
+        return $this->scopeForSolicitante($personaId, $tipos)->findAll();
+    }
+
+    /**
+     * Query for a solicitante (returns $this to chain ->paginate($n)).
+     * @param list<string>|null $tipos
+     * @param array{fecha_desde?:string,fecha_hasta?:string} $filters
+     */
+    public function scopeForSolicitante(int $personaId, ?array $tipos = null, array $filters = []): self
+    {
+        $this->select('accesos.*, casas.identificador AS casa_ident')
             ->join('casas', 'casas.id = accesos.casa_id', 'left')
-            ->where('accesos.solicitante_persona_id', $personaId)
-            ->orderBy('accesos.id', 'DESC')
-            ->findAll();
+            ->where('accesos.solicitante_persona_id', $personaId);
+        if ($tipos !== null) {
+            $this->whereIn('accesos.tipo', $tipos);
+        }
+        if (! empty($filters['fecha_desde'])) {
+            $this->where('accesos.created_at >=', $filters['fecha_desde']);
+        }
+        if (! empty($filters['fecha_hasta'])) {
+            $this->where('accesos.created_at <=', $filters['fecha_hasta']);
+        }
+
+        return $this->orderBy('accesos.id', 'DESC');
     }
 
     /**

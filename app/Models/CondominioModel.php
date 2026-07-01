@@ -20,7 +20,7 @@ class CondominioModel extends Model
         'nombre', 'slug', 'direccion', 'colonia', 'municipio', 'estado', 'cp',
         'pais', 'moneda', 'max_ocupantes', 'telefono', 'email',
         'razon_social', 'rfc', 'regimen_fiscal', 'cp_fiscal',
-        'latitud', 'longitud',
+        'latitud', 'longitud', 'horarios',
         'logo_path', 'settings', 'activo',
     ];
 
