@@ -34,10 +34,8 @@
 
         /* Topbar: collapses to a hamburger on small screens */
         header.topbar { background:var(--bg); color:#fff; display:flex; flex-wrap:wrap; align-items:center; gap:.6rem; padding:.5rem 1rem; position:sticky; top:0; z-index:40; }
-        header.topbar .brand { order:1; margin-right:auto; display:inline-flex; align-items:center; gap:.5rem; text-decoration:none; }
-        header.topbar .brand img { height:30px; width:auto; display:block; }
-        header.topbar .brand .wordmark { color:#fff; font-weight:800; font-size:1.2rem; letter-spacing:-.02em; line-height:1; }
-        header.topbar .brand .wordmark b { color:var(--sand); font-weight:800; }
+        header.topbar .brand { order:1; margin-right:auto; display:inline-flex; align-items:center; text-decoration:none; }
+        header.topbar .brand img { height:32px; width:auto; display:block; }
         .nav-toggle { display:none; }
         .hamburger { order:0; display:inline-flex; align-items:center; justify-content:center; width:40px; height:40px; margin-left:-.35rem; color:#cbd5e1; cursor:pointer; border-radius:8px; font-size:1.4rem; user-select:none; }
         .hamburger:hover { color:#fff; background:#2a3a31; }
@@ -164,8 +162,7 @@
             <label for="navtoggle" class="hamburger" aria-label="Menú" title="Menú">☰</label>
         <?php endif; ?>
         <a class="brand" href="<?= site_url($isAuthed ? 'dashboard' : '/') ?>">
-            <img src="<?= base_url('brand/svg/erpKaan-isotipo.svg') ?>" alt="">
-            <span class="wordmark">erp<b>Kaan</b></span>
+            <img src="<?= base_url('brand/png/erpKaan-logotipo-reversed-1020.png') ?>" alt="erpKaan">
         </a>
         <?php if ($isAuthed): ?>
             <?php
